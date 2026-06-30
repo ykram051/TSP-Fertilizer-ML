@@ -19,36 +19,84 @@ This project aims to analyze industrial production data from the Triple Super Ph
 - Build a real-time dashboard for monitoring and prediction
 
 ---
-
 ## Project Structure
+
+```text
 tsp-fertilizer-ml/
 │
-├── data/
-│ ├── raw/
-│ ├── processed/
-│ └── sample/
+├── .github/                     # GitHub workflows (CI/CD)
+│   └── workflows/
 │
-├── notebooks/
+├── data/
+│   ├── raw/                     # Original production data (not tracked)
+│   ├── processed/               # Cleaned and transformed datasets
+│   ├── external/                # External/reference datasets
+│   └── sample/                  # Sample data for testing/demo
+│
+├── notebooks/                   # Jupyter notebooks
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_data_preprocessing.ipynb
+│   ├── 03_feature_engineering.ipynb
+│   ├── 04_model_training.ipynb
+│   └── 05_model_evaluation.ipynb
 │
 ├── src/
-│ ├── data/
-│ ├── features/
-│ ├── models/
-│ ├── dashboard/
-│ └── utils/
+│   ├── data/
+│   │   ├── load_data.py
+│   │   ├── preprocess.py
+│   │   └── validation.py
+│   │
+│   ├── features/
+│   │   └── feature_engineering.py
+│   │
+│   ├── models/
+│   │   ├── train.py
+│   │   ├── predict.py
+│   │   ├── evaluate.py
+│   │   └── tuning.py
+│   │
+│   ├── dashboard/
+│   │   ├── app.py
+│   │   ├── pages/
+│   │   └── components/
+│   │
+│   ├── deployment/
+│   │   ├── api.py
+│   │   └── inference.py
+│   │
+│   ├── visualization/
+│   │   └── plots.py
+│   │
+│   └── utils/
+│       ├── config.py
+│       ├── logger.py
+│       └── helpers.py
 │
-├── models/
+├── models/                      # Saved trained models
+│   ├── best_model.pkl
+│   └── scaler.pkl
 │
 ├── reports/
+│   ├── figures/
+│   ├── metrics/
+│   └── final_report.pdf
 │
-├── images/
+├── tests/                       # Unit tests
+│   ├── test_data.py
+│   ├── test_features.py
+│   └── test_models.py
+│
+├── docs/                        # Documentation
+│
+├── config/
+│   └── config.yaml
 │
 ├── requirements.txt
+├── .gitignore
 ├── README.md
-└── .gitignore
-
-
----
+├── LICENSE
+└── Dockerfile
+```
 
 ## Workflow
 
