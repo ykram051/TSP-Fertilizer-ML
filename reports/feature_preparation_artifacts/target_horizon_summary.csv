@@ -1,0 +1,5 @@
+horizon_min,target_column,usable_rows_after_warmup_and_target_alignment,unavailable_tail_rows,target_missing_rows_in_usable_period
+1,SLURRY_FREE_ACID_t_plus_1min,44302,1,308
+5,SLURRY_FREE_ACID_t_plus_5min,44298,5,312
+10,SLURRY_FREE_ACID_t_plus_10min,44293,10,317
+15,SLURRY_FREE_ACID_t_plus_15min,44288,15,322

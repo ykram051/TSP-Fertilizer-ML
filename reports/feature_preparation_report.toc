@@ -1,0 +1,79 @@
+\contentsline {section}{\numberline {1}Executive decision and scientific purpose}{2}{section.1}%
+\contentsline {section}{\numberline {2}Dataset and execution basis}{2}{section.2}%
+\contentsline {paragraph}{Decision.}{2}{section*.2}%
+\contentsline {paragraph}{Implementation.}{2}{section*.3}%
+\contentsline {paragraph}{Actual output.}{2}{section*.4}%
+\contentsline {paragraph}{Modeling meaning.}{2}{section*.5}%
+\contentsline {paragraph}{Limitation.}{2}{section*.6}%
+\contentsline {section}{\numberline {3}Process-variable registry and intervention safety}{2}{section.3}%
+\contentsline {paragraph}{Decision.}{2}{section*.7}%
+\contentsline {paragraph}{Implementation.}{3}{section*.8}%
+\contentsline {paragraph}{Actual output.}{3}{section*.9}%
+\contentsline {paragraph}{Modeling meaning.}{3}{section*.10}%
+\contentsline {paragraph}{Limitation.}{3}{section*.11}%
+\contentsline {section}{\numberline {4}Multi-horizon target construction}{3}{section.4}%
+\contentsline {paragraph}{Decision.}{3}{section*.12}%
+\contentsline {paragraph}{Implementation.}{3}{section*.13}%
+\contentsline {paragraph}{Actual output.}{3}{section*.14}%
+\contentsline {paragraph}{Modeling meaning.}{3}{section*.15}%
+\contentsline {paragraph}{Limitation.}{3}{section*.16}%
+\contentsline {section}{\numberline {5}Training-only selected-lag methodology}{3}{section.5}%
+\contentsline {paragraph}{Decision.}{3}{section*.17}%
+\contentsline {paragraph}{Implementation.}{4}{section*.18}%
+\contentsline {paragraph}{Actual output.}{4}{section*.19}%
+\contentsline {paragraph}{Modeling meaning.}{4}{section*.20}%
+\contentsline {paragraph}{Limitation.}{4}{section*.21}%
+\contentsline {section}{\numberline {6}Compact temporal engineering}{6}{section.6}%
+\contentsline {paragraph}{Decision.}{6}{section*.22}%
+\contentsline {paragraph}{Implementation.}{6}{section*.23}%
+\contentsline {paragraph}{Actual output.}{6}{section*.24}%
+\contentsline {paragraph}{Modeling meaning.}{6}{section*.25}%
+\contentsline {paragraph}{Limitation.}{6}{section*.26}%
+\contentsline {section}{\numberline {7}Process-aware features and validation metadata}{7}{section.7}%
+\contentsline {paragraph}{Decision.}{7}{section*.27}%
+\contentsline {paragraph}{Implementation.}{7}{section*.28}%
+\contentsline {paragraph}{Actual output.}{7}{section*.29}%
+\contentsline {paragraph}{Modeling meaning.}{7}{section*.30}%
+\contentsline {paragraph}{Limitation.}{7}{section*.31}%
+\contentsline {section}{\numberline {8}Guarded ratios, clipping, and numerical stability}{9}{section.8}%
+\contentsline {paragraph}{Decision.}{9}{section*.32}%
+\contentsline {paragraph}{Implementation.}{9}{section*.33}%
+\contentsline {paragraph}{Actual output.}{9}{section*.34}%
+\contentsline {paragraph}{Modeling meaning.}{9}{section*.35}%
+\contentsline {paragraph}{Limitation.}{9}{section*.36}%
+\contentsline {section}{\numberline {9}Structural warm-up versus genuine missingness}{9}{section.9}%
+\contentsline {paragraph}{Decision.}{9}{section*.37}%
+\contentsline {paragraph}{Implementation.}{9}{section*.38}%
+\contentsline {paragraph}{Actual output.}{9}{section*.39}%
+\contentsline {paragraph}{Modeling meaning.}{9}{section*.40}%
+\contentsline {paragraph}{Limitation.}{10}{section*.41}%
+\contentsline {section}{\numberline {10}Four feature-set hypotheses}{10}{section.10}%
+\contentsline {paragraph}{Decision.}{10}{section*.42}%
+\contentsline {paragraph}{Implementation.}{10}{section*.43}%
+\contentsline {paragraph}{Actual output.}{10}{section*.44}%
+\contentsline {paragraph}{Modeling meaning.}{10}{section*.45}%
+\contentsline {paragraph}{Limitation.}{10}{section*.46}%
+\contentsline {section}{\numberline {11}Chronological splitting by horizon}{11}{section.11}%
+\contentsline {paragraph}{Decision.}{11}{section*.47}%
+\contentsline {paragraph}{Implementation.}{11}{section*.48}%
+\contentsline {paragraph}{Actual output.}{11}{section*.49}%
+\contentsline {paragraph}{Modeling meaning.}{11}{section*.50}%
+\contentsline {paragraph}{Limitation.}{11}{section*.51}%
+\contentsline {section}{\numberline {12}Grouped, interpretability-aware correlation filtering}{11}{section.12}%
+\contentsline {paragraph}{Decision.}{11}{section*.52}%
+\contentsline {paragraph}{Implementation.}{11}{section*.53}%
+\contentsline {paragraph}{Actual output.}{11}{section*.54}%
+\contentsline {paragraph}{Modeling meaning.}{12}{section*.55}%
+\contentsline {paragraph}{Limitation.}{12}{section*.56}%
+\contentsline {section}{\numberline {13}Final dimensions and preprocessing variants}{14}{section.13}%
+\contentsline {paragraph}{Decision.}{14}{section*.57}%
+\contentsline {paragraph}{Implementation.}{14}{section*.58}%
+\contentsline {paragraph}{Actual output.}{14}{section*.59}%
+\contentsline {paragraph}{Modeling meaning.}{14}{section*.60}%
+\contentsline {paragraph}{Limitation.}{14}{section*.61}%
+\contentsline {section}{\numberline {14}Readiness audit}{16}{section.14}%
+\contentsline {section}{\numberline {15}Limitations and engineering validation requirements}{16}{section.15}%
+\contentsline {section}{\numberline {16}Implications for the next modeling stage}{17}{section.16}%
+\contentsline {section}{\numberline {17}Change log from the previous report}{17}{section.17}%
+\contentsline {section}{\numberline {18}Recommended next deliverable}{17}{section.18}%
+\contentsline {section}{\numberline {A}Executed artifact inventory}{17}{appendix.A}%

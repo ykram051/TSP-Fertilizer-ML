@@ -1,0 +1,323 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+\usetheme{default}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+
+\definecolor{Green}{HTML}{147A5B}
+\definecolor{Navy}{HTML}{17324D}
+\definecolor{Gold}{HTML}{D49B2A}
+\definecolor{Light}{HTML}{F1F4F6}
+\definecolor{Gray}{HTML}{667788}
+\definecolor{Red}{HTML}{B54242}
+
+\setbeamercolor{normal text}{fg=Navy,bg=white}
+\setbeamercolor{structure}{fg=Green}
+\setbeamercolor{frametitle}{fg=white,bg=Navy}
+\setbeamercolor{block title}{fg=white,bg=Green}
+\setbeamercolor{block body}{fg=Navy,bg=Light}
+\setbeamercolor{alerted text}{fg=Gold}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{Green}$\blacktriangleright$}
+\setbeamertemplate{footline}{\hfill\color{Gray}\insertframenumber/\inserttotalframenumber\hspace{0.45cm}\vspace{0.22cm}}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\newcommand{\good}[1]{\textcolor{Green}{\textbf{#1}}}
+\newcommand{\bad}[1]{\textcolor{Red}{\textbf{#1}}}
+\newcommand{\smallnote}[1]{{\scriptsize\color{Gray}#1}}
+
+\title{SLURRY\_FREE\_ACID Modeling}
+\subtitle{Project advancement and current evidence}
+\author{Internship project}
+\date{July 2026}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \begin{beamercolorbox}[wd=\paperwidth,ht=\paperheight,dp=0pt]{frametitle}
+    \vspace{2.2cm}\hspace{1.3cm}
+    \begin{minipage}{0.76\textwidth}
+      {\color{white}\LARGE\bfseries\inserttitle\par}
+      \vspace{0.3cm}
+      {\color{white!85}\Large\insertsubtitle\par}
+      \vspace{0.8cm}
+      {\color{white!70}\insertauthor\hfill\insertdate}
+    \end{minipage}
+    \vfill
+    \color{Gold}\rule{\paperwidth}{4pt}
+  \end{beamercolorbox}
+\end{frame}
+
+\begin{frame}{1. The project now covers three operational cases}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.31\textwidth}
+      \textbf{1. Direct future level}
+      \[X_{\leq t}\longrightarrow \hat y_{t+h}\]
+      Process measurements predict the future acid level directly.
+      \vspace{0.2cm}
+
+      \smallnote{Useful when process measurements are available; evaluated against persistence when $y_t$ is observed.}
+    \column{0.31\textwidth}
+      \textbf{2. Target-anchored forecast}
+      \[X_{\leq t},y_{\leq t}\longrightarrow \widehat{\Delta y}_{t,h}\]
+      The model predicts the change, then reconstructs
+      $\hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h}$.
+      \vspace{0.2cm}
+
+      \smallnote{Best forecasting case, but it requires a current free-acid measurement.}
+    \column{0.31\textwidth}
+      \textbf{3. Target-free virtual sensor}
+      \[X_{\leq t}\longrightarrow \hat y_t\]
+      Process measurements estimate the current acid level without any target column.
+      \vspace{0.2cm}
+
+      \smallnote{Designed for a new CSV containing only process variables.}
+  \end{columns}
+
+  \vfill
+  \begin{block}{Important distinction}
+    These are different deployment contracts. The target-anchored model cannot be used when the uploaded file contains no SLURRY\_FREE\_ACID observations.
+  \end{block}
+\end{frame}
+
+\begin{frame}{2. Preparation was designed as a controlled experiment}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \textbf{Data and targets}
+      \begin{itemize}
+        \item 44,640 chronological one-minute records
+        \item 21 process measurements
+        \item Forecast horizons $h\in\{1,5,10,15\}$ minutes
+        \item $y_{t+h}=\mathrm{SLURRY\_FREE\_ACID}_{t+h}$
+      \end{itemize}
+    \column{0.48\textwidth}
+      \textbf{Leakage controls}
+      \begin{itemize}
+        \item Chronological train/validation/test splits
+        \item Lag selection uses training targets only
+        \item Imputers, scalers and filters fitted on training only
+        \item Structural warm-up removed before splitting
+      \end{itemize}
+  \end{columns}
+
+  \vspace{0.25cm}
+  \begin{block}{Scientific purpose}
+    Compare feature hypotheses and horizons fairly, rather than create one oversized feature matrix.
+  \end{block}
+\end{frame}
+
+\begin{frame}{3. Four feature sets test four hypotheses}
+  \small
+  \begin{tabular}{>{\bfseries}L{0.15\textwidth}L{0.35\textwidth}L{0.42\textwidth}}
+    \toprule
+    Set & Contents & Hypothesis \\
+    \midrule
+    A --- Raw & Current process measurements & The current process state may be sufficient. \\
+    B --- Temporal & Raw values plus selected lags, rolling behavior, differences and trends & Process history may reveal delayed responses and recent dynamics. \\
+    C --- Process-aware & Raw values plus balances, ratios, thermal gradients and stability indicators & Interpretable process relationships may improve prediction and generalization. \\
+    D --- Full & Accepted temporal and process-aware features & Historical and process-relationship evidence may be complementary. \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \smallnote{Examples include TOTAL\_ACID\_FLOW, ACID\_FLOW\_IMBALANCE and TOTAL\_SLURRY\_M3\_FLOW. Ratios and proxies remain provisional when units or stream correspondence are unconfirmed.}
+\end{frame}
+
+\begin{frame}{4. A small model set covered complementary behaviors}
+  \small
+  \begin{tabular}{>{\bfseries}L{0.18\textwidth}L{0.30\textwidth}L{0.44\textwidth}}
+    \toprule
+    Model & Quick definition & Why it was included \\
+    \midrule
+    Ridge & Regularized linear regression & Stable, fast and interpretable baseline for many correlated features. \\
+    PLS & Latent-variable linear regression & Classical industrial baseline for strongly collinear process sensors. \\
+    Extra Trees & Average of randomized decision trees & Captures nonlinear thresholds and feature interactions. \\
+    HistGradient & Sequential histogram-based trees & Compact nonlinear boosting with efficient training. \\
+    XGBoost / LightGBM & Optimized boosted-tree ensembles & Strong tabular learners for complex nonlinear relationships. \\
+    KNN & Prediction from similar historical process states & Tests a local, just-in-time modeling hypothesis. \\
+    Weighted blend & Validation-selected average of two models & Combines complementary linear and nonlinear errors. \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \smallnote{Search spaces were deliberately small. Selection used chronological validation; the untouched test period was evaluated once.}
+\end{frame}
+
+\begin{frame}{5. Direct level models did not beat persistence}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.58\textwidth}
+      \small
+      \begin{tabular}{rrrr}
+        \toprule
+        Horizon & MAE & RMSE & vs. persistence \\
+        \midrule
+        1 min  & 0.269 & 0.332 & \bad{-67.9\%} \\
+        5 min  & 0.275 & 0.338 & \bad{-35.1\%} \\
+        10 min & 0.280 & 0.344 & \bad{-22.6\%} \\
+        15 min & 0.304 & 0.378 & \bad{-27.5\%} \\
+        \bottomrule
+      \end{tabular}
+      \vspace{0.2cm}
+
+      \smallnote{Validation selected Ridge with Feature Set D at every horizon. Negative improvement means the model is worse than carrying the current target forward.}
+    \column{0.38\textwidth}
+      \textbf{Interpretation}
+      \begin{itemize}
+        \item The model learned the operating level.
+        \item Persistence already has a powerful anchor: the observed $y_t$.
+        \item Direct level learning spent capacity reproducing that level instead of learning movement.
+      \end{itemize}
+  \end{columns}
+
+  \vfill
+  \begin{block}{Decision}
+    Reframe the anchored task around the future change, not the absolute level.
+  \end{block}
+\end{frame}
+
+\begin{frame}{6. Predicting change made the anchored forecast useful}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.58\textwidth}
+      \small
+      \begin{tabular}{rrrrr}
+        \toprule
+        Horizon & MAE & RMSE & $R^2$ & vs. persistence \\
+        \midrule
+        1 min  & 0.102 & 0.151 & 0.889 & \good{+23.2\%} \\
+        5 min  & 0.113 & 0.169 & 0.862 & \good{+32.3\%} \\
+        10 min & 0.126 & 0.182 & 0.839 & \good{+34.9\%} \\
+        15 min & 0.176 & 0.237 & 0.726 & \good{+19.8\%} \\
+        \bottomrule
+      \end{tabular}
+      \vspace{0.2cm}
+
+      \smallnote{Selected model: Ridge, hybrid full set, 188 inputs, $\alpha=10$. Metrics are computed after reconstructing $\hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h}$.}
+    \column{0.38\textwidth}
+      \textbf{Why it improved}
+      \begin{itemize}
+        \item $y_t$ supplies the current level.
+        \item The model focuses on the smaller future movement.
+        \item Target history and process features both added value.
+        \item Ten minutes gave the largest relative gain, but with higher absolute error than 1 or 5 minutes.
+      \end{itemize}
+  \end{columns}
+
+  \vfill
+  \alert{Constraint:} this model requires current and past SLURRY\_FREE\_ACID values at prediction time.
+\end{frame}
+
+\begin{frame}{7. Process information and target history were complementary}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.53\textwidth}
+      \textbf{Ablation findings}
+      \begin{itemize}
+        \item Accepted features improved over raw-only inputs by \textbf{10.3--24.2\%}, depending on horizon.
+        \item Adding target history to exogenous full features improved RMSE by \textbf{8.2--12.7\%}.
+        \item Adding process/full information over target history alone improved RMSE by \textbf{5.4--23.5\%}.
+      \end{itemize}
+    \column{0.43\textwidth}
+      \textbf{Alternatives tested}
+      \begin{itemize}
+        \item Extra Trees did not replace Ridge after validation.
+        \item Transition weighting slightly helped transition errors but worsened overall RMSE.
+        \item A logistic warning classifier had low precision (0.14--0.16) and high false-warning rates (0.26--0.29).
+      \end{itemize}
+  \end{columns}
+
+  \vfill
+  \begin{block}{Meaning}
+    The compact hybrid model was retained. The warning classifier remains a research diagnostic, not an operational alarm.
+  \end{block}
+\end{frame}
+
+\begin{frame}{8. A target-free virtual sensor works, with limitations}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.55\textwidth}
+      \textbf{Selected model}
+      \begin{itemize}
+        \item 50/50 validation-selected blend
+        \item Feature Set D Ridge + LightGBM
+        \item No current or historical target input
+      \end{itemize}
+      \vspace{0.15cm}
+      \small
+      \begin{tabular}{lrr}
+        \toprule
+        Test measure & Mean baseline & Blend \\
+        \midrule
+        MAE  & 0.355 & \good{0.249} \\
+        RMSE & 0.454 & \good{0.301} \\
+        $R^2$ & $\approx 0$ & \good{0.558} \\
+        \bottomrule
+      \end{tabular}
+    \column{0.41\textwidth}
+      \textbf{Interpretation}
+      \begin{itemize}
+        \item RMSE improved by about \textbf{33.6\%} over the training-mean baseline.
+        \item The linear and nonlinear models made complementary errors.
+        \item An empirical 90\% interval achieved \textbf{89.7\%} test coverage.
+        \item Performance degraded strongly outside the training envelope.
+      \end{itemize}
+  \end{columns}
+
+  \vfill
+  \alert{This estimates the current value; it is not yet a validated 10-minute early-warning forecast without target history.}
+\end{frame}
+
+\begin{frame}{9. The dashboard turns the notebooks into an investigation tool}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \textbf{Available functions}
+      \begin{itemize}
+        \item Upload a CSV or use the default month
+        \item Explore signals, missingness and correlations
+        \item Detect candidate multivariate process-change windows
+        \item Inspect which sensors drove each window
+      \end{itemize}
+    \column{0.48\textwidth}
+      \textbf{Prediction functions}
+      \begin{itemize}
+        \item Target-anchored forecasts at 1, 5, 10 and 15 minutes
+        \item Target-free virtual-sensor estimates
+        \item Prediction intervals and drift flags
+        \item Error metrics only when labels are available
+      \end{itemize}
+  \end{columns}
+
+  \vspace{0.25cm}
+  \begin{block}{How to read a detected window}
+    The green score measures joint sensor movement, not target abnormality. A highlighted window is a candidate process transition; it must be compared with the later target response, prediction error and plant-event records.
+  \end{block}
+\end{frame}
+
+\begin{frame}{10. Current conclusion and supervisor validation needs}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \textbf{What the evidence supports}
+      \begin{itemize}
+        \item Target-anchored change forecasting beats persistence at all four horizons.
+        \item The target-free virtual sensor is materially better than a constant baseline.
+        \item Process-aware and temporal information add measurable value.
+      \end{itemize}
+    \column{0.48\textwidth}
+      \textbf{What remains unproven}
+      \begin{itemize}
+        \item Generalization to another month, season or product grade
+        \item Reliable operational warning during confirmed plant events
+        \item Causal or controllable interpretation of important variables
+      \end{itemize}
+  \end{columns}
+
+  \vspace{0.2cm}
+  \begin{block}{Questions for process validation}
+    Confirm units for acid, ground phosphate, fuel oil, steam, wash liquid and recyclage; define the recycled stream; confirm slurry mass/volume stream correspondence; identify startups, shutdowns and disturbances; confirm which variables are truly controllable.
+  \end{block}
+
+  \smallnote{Recommended next evidence: evaluate a later labeled month against the frozen pipelines and compare stable operation with confirmed transition events.}
+\end{frame}
+
+\end{document}

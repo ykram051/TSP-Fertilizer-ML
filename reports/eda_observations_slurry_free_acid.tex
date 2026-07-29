@@ -1,0 +1,634 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\setlist[itemize]{leftmargin=1.2em}
+\setlist[enumerate]{leftmargin=1.4em}
+\renewcommand{\arraystretch}{1.15}
+
+\title{Exploratory Data Analysis Observations for \texttt{SLURRY\_FREE\_ACID} Prediction}
+\author{TSP Fertilizer Process Analytics Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Purpose of This Report}
+
+This report summarizes the main findings from the exploratory analysis of the one-minute TSP fertilizer production dataset. The confirmed prediction target is:
+
+\[
+\texttt{SLURRY\_FREE\_ACID}
+\]
+
+The objective is not only to describe the dataset statistically, but also to interpret what the observed patterns imply for future feature engineering, machine learning, and industrial understanding of the process.
+
+The analysis uses only \texttt{tsp\_1min.csv}. Any other CSV file present in the repository is ignored.
+
+\section{Dataset Structure and Time Coverage}
+
+\subsection{Main Facts}
+
+\begin{itemize}
+    \item Number of rows: 44,640.
+    \item Number of columns: 23.
+    \item Time range: from 2026-01-01 00:00 UTC to 2026-01-31 23:59 UTC.
+    \item Sampling frequency: one row per minute.
+    \item Duplicate rows: 0.
+    \item Duplicate timestamps: 0.
+    \item Confirmed target: \texttt{SLURRY\_FREE\_ACID}.
+\end{itemize}
+
+\subsection{Interpretation}
+
+The dataset covers exactly one full month of minute-level operation. This is a strong foundation for exploratory time-series analysis because the timestamp sequence is clean and regular. The absence of duplicate timestamps is particularly important: it means each row can be interpreted as one unique operating state.
+
+However, one month is still a relatively short historical window for industrial machine learning. It is enough to study short-term behavior, daily patterns, operational disturbances, and preliminary lag relationships. It is not enough to make strong conclusions about yearly seasonality, long-term feedstock changes, equipment aging, or rare events.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Future model validation must respect chronological order.
+    \item Random train-test splitting should not be used because it would mix future plant behavior into the training set.
+    \item A suitable first validation strategy is to train on the earlier part of January and test on the latest part of January.
+    \item If more months become available, the next step should be rolling-origin or expanding-window validation.
+\end{itemize}
+
+\section{Missing Values and Completeness}
+
+\subsection{Observed Pattern}
+
+Missing values are present but low overall. The highest missing percentages are below 1\%.
+
+\begin{longtable}{p{8cm}rr}
+\toprule
+Variable & Missing Count Approx. & Missing Percentage \\
+\midrule
+\texttt{DEPRESSURE\_SECHEUR} & 444 & 0.995\% \\
+\texttt{FLOW\_RATE\_FIOUL} & 414 & 0.927\% \\
+\texttt{FLOW\_RATE\_VAPEUR} & 396 & 0.887\% \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & 393 & 0.880\% \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR} & 385 & 0.862\% \\
+\texttt{RECYCLAGE} & 368 & 0.824\% \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_1} & 367 & 0.822\% \\
+\texttt{SLURRY\_FREE\_ACID} & 308 & 0.690\% \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+The dataset is not heavily incomplete. Missingness below 1\% usually does not prevent modeling, but it still matters because process data is time-dependent. A missing value may represent a communication issue, sensor unavailability, historian drop, or a plant event. Therefore, missing values should not be treated as random without checking their time distribution.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Do not drop all rows with missing values by default; this could remove important event periods.
+    \item Use train-only imputation in machine learning pipelines.
+    \item Median imputation is a reasonable baseline for tree models.
+    \item For time-series models, forward fill or interpolation may be considered, but only if it is physically defensible for the sensor.
+    \item Add missingness indicators for critical sensors if missing values cluster around disturbances.
+\end{itemize}
+
+\section{Target Variable: \texttt{SLURRY\_FREE\_ACID}}
+
+\subsection{Statistical Summary}
+
+\begin{longtable}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Valid observations & 44,332 \\
+Missing observations & 308 \\
+Mean & 11.298 \\
+Median & 11.311 \\
+Standard deviation & 0.515 \\
+Minimum & 3.392 \\
+1st percentile & 10.225 \\
+5th percentile & 10.536 \\
+25th percentile & 10.992 \\
+75th percentile & 11.620 \\
+95th percentile & 12.012 \\
+99th percentile & 12.308 \\
+Maximum & 52.671 \\
+Skewness & 12.084 \\
+Kurtosis & 959.040 \\
+IQR lower bound & 10.050 \\
+IQR upper bound & 12.562 \\
+IQR outliers & 352 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Main Pattern}
+
+Most \texttt{SLURRY\_FREE\_ACID} values are concentrated around 11.0 to 11.6. The median is 11.311 and the mean is 11.298, which indicates that the normal operating center is very stable.
+
+At the same time, the maximum value is 52.671, which is extremely far from the main operating range. This single value, along with other spikes such as 25.964 and 20.771, creates very high skewness and kurtosis.
+
+\subsection{Important Extreme Values}
+
+\begin{longtable}{p{5cm}r}
+\toprule
+Timestamp & \texttt{SLURRY\_FREE\_ACID} \\
+\midrule
+2026-01-18 14:12 UTC & 52.671 \\
+2026-01-19 13:35 UTC & 25.964 \\
+2026-01-02 06:41 UTC & 20.771 \\
+2026-01-13 12:59 UTC & 17.487 \\
+2026-01-13 23:32 UTC & 17.293 \\
+2026-01-23 09:11 UTC & 15.744 \\
+2026-01-01 00:06 UTC & 15.118 \\
+\bottomrule
+\end{longtable}
+ 
+Very low target values were also observed, including 3.392 on 2026-01-05 05:50 UTC and 6.023 on 2026-01-18 19:50 UTC.
+
+\subsection{Interpretation}
+
+The target behaves like a mostly stable quality variable with occasional abnormal events. The typical variation is small, but rare excursions are large. This is common in industrial quality data: normal production may be tightly controlled, while startup, shutdown, maintenance, feed changes, instrumentation errors, or process disturbances create unusual values.
+
+The extreme value 52.671 should be treated carefully. It may be:
+
+\begin{itemize}
+    \item a real process upset,
+    \item a laboratory or analyzer anomaly,
+    \item a data-entry or historian issue,
+    \item a transient during nonstandard operation,
+    \item or a unit/scale inconsistency at that timestamp.
+\end{itemize}
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Do not automatically remove target outliers.
+    \item Create an event flag for extreme target values and review them with process engineers.
+    \item Consider robust evaluation metrics such as MAE and median absolute error, not only RMSE.
+    \item Compare model performance on normal operation and abnormal operation separately.
+    \item If the extreme target values are confirmed as sensor or lab errors, handle them in a documented cleaning step.
+    \item If the extreme target values are real process events, preserve them because they are important for industrial reliability.
+\end{itemize}
+
+\section{Outlier Behavior}
+
+\subsection{Observed Pattern}
+
+Using the IQR rule, 352 rows are flagged as target outliers. Some outliers are isolated spikes, while others occur in short continuous periods.
+
+Examples of outlier periods include:
+
+\begin{longtable}{p{4cm}p{4cm}rrr}
+\toprule
+Start & End & Count & Min Target & Max Target \\
+\midrule
+2026-01-28 22:18 & 2026-01-28 22:45 & 28 & 8.659 & 9.996 \\
+2026-01-13 19:47 & 2026-01-13 20:09 & 23 & 8.625 & 9.967 \\
+2026-01-05 10:25 & 2026-01-05 10:47 & 23 & 9.434 & 10.039 \\
+2026-01-22 08:53 & 2026-01-22 09:12 & 20 & 8.594 & 9.818 \\
+2026-01-28 20:57 & 2026-01-28 21:11 & 15 & 9.867 & 10.038 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+The outlier periods are not only high spikes. Several outlier windows are low-acid periods below the IQR lower bound. This means future modeling must handle both high-acid excursions and low-acid excursions.
+
+Continuous outlier intervals are more likely to represent real process regimes or disturbances than single-point spikes. Single-point extremes may still be real, but they deserve special sensor validation.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Add event-window features: rolling maximum, rolling minimum, rolling standard deviation, and recent change rate.
+    \item Consider separate error analysis for low-acid and high-acid abnormal periods.
+    \item Ask process engineers whether the main outlier windows correspond to known events.
+    \item Avoid training a model that only performs well around the median target value.
+\end{itemize}
+
+\section{Negative and Physically Suspicious Values}
+
+\subsection{Observed Pattern}
+
+Several variables contain negative values. Some may be physically impossible depending on sensor definition.
+
+\begin{longtable}{p{8cm}r}
+\toprule
+Variable & Negative Count \\
+\midrule
+\texttt{DEPRESSURE\_SECHEUR} & 4,861 \\
+\texttt{FLOW\_RATE\_VAPEUR} & 475 \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR\_2} & 453 \\
+\texttt{FLOW\_RATE\_FIOUL} & 451 \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR} & 420 \\
+\texttt{FLOW\_RATE\_LIQUIDE\_LAVAGE} & 360 \\
+\texttt{PRODUCTION\_TSP\_BALANCE} & 354 \\
+\texttt{RECYCLAGE} & 314 \\
+\texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & 252 \\
+\texttt{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & 89 \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & 59 \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_1} & 1 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+Negative values in flow rates and production balance are suspicious because these quantities are usually non-negative in physical operation. However, negative dryer depression may be meaningful depending on the sign convention. For example, \texttt{DEPRESSURE\_SECHEUR} may represent draft or vacuum, where negative values can be physically valid.
+
+Negative flow values may indicate:
+
+\begin{itemize}
+    \item sensor noise around zero,
+    \item calibration offset,
+    \item shutdown or stopped-flow conditions,
+    \item reverse signal convention,
+    \item historian preprocessing artifacts,
+    \item or abnormal process conditions.
+\end{itemize}
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Define physical validity rules variable by variable with process engineers.
+    \item Do not apply one universal negative-value rule to all sensors.
+    \item For true flow rates, consider clipping small negative noise to zero only if confirmed.
+    \item Add binary flags for suspicious negative values before deciding whether to impute or clip.
+    \item Treat negative production or flow values as potential shutdown/transient indicators.
+\end{itemize}
+
+\section{Correlation with \texttt{SLURRY\_FREE\_ACID}}
+
+\subsection{Strongest Pearson Correlations}
+
+The strongest absolute correlations with \texttt{SLURRY\_FREE\_ACID} are moderate, not extremely high.
+
+\begin{longtable}{p{8cm}r}
+\toprule
+Variable & Pearson Correlation with Target \\
+\midrule
+\texttt{FLOW\_RATE\_FIOUL} & 0.364 \\
+\texttt{FLOW\_RATE\_VAPEUR} & 0.359 \\
+\texttt{RECYCLAGE} & 0.356 \\
+\texttt{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & 0.346 \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR} & 0.342 \\
+\texttt{PRODUCTION\_TSP\_BALANCE} & 0.339 \\
+\texttt{PRESSURE\_VAPEUR} & 0.323 \\
+\texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & 0.319 \\
+\texttt{TEMPERATURE\_GAZ\_SORTIE\_SECHEUR} & 0.314 \\
+\texttt{LEVEL\_CUVE\_PASSAGE} & 0.301 \\
+\texttt{TEMPERATURE\_AIR\_CHAUD} & 0.295 \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & 0.289 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+All major correlations with the target are positive in this dataset. This suggests that higher production intensity, higher recycle, higher steam/fuel usage, and higher slurry flow tend to be associated with higher free acid.
+
+However, the correlations are moderate. This is important: \texttt{SLURRY\_FREE\_ACID} is not explained by one single variable. It is likely controlled by a combination of feed ratios, residence time, thermal state, recycle, and operating regime.
+
+\subsection{Process Meaning}
+
+\begin{itemize}
+    \item \texttt{FLOW\_RATE\_FIOUL} and thermal variables suggest that dryer or heat-load conditions are linked to acid behavior.
+    \item \texttt{FLOW\_RATE\_VAPEUR}, \texttt{PRESSURE\_VAPEUR}, and steam-related variables suggest utility conditions may influence or track the process state.
+    \item \texttt{RECYCLAGE} and slurry flows suggest that internal circulation and material loading are important.
+    \item Acid flow alone is not the only dominant signal; therefore acid concentration likely depends on balance between acid, phosphate, recycle, and residence time.
+\end{itemize}
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Models should include multiple process areas: feed, slurry, recycle, steam, dryer, and production variables.
+    \item Feature engineering should include ratios and interactions, not only raw values.
+    \item Correlation should be used for screening, not for causal claims.
+    \item A tree-based model or gradient boosting model is likely more suitable than a purely linear model as a first strong baseline.
+\end{itemize}
+
+\section{Time-Lag Relationships}
+
+\subsection{Observed Pattern}
+
+Several variables show slightly stronger correlation with \texttt{SLURRY\_FREE\_ACID} when shifted by a few minutes.
+
+\begin{longtable}{p{8cm}rrr}
+\toprule
+Variable & Best Lag (min) & Lagged Corr. & Lag-0 Corr. \\
+\midrule
+\texttt{FLOW\_RATE\_VAPEUR} & 3 & 0.361 & 0.359 \\
+\texttt{RECYCLAGE} & 5 & 0.360 & 0.356 \\
+\texttt{FLOW\_RATE\_FIOUL} & 1 & 0.356 & 0.364 \\
+\texttt{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & 1 & 0.353 & 0.346 \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR} & 1 & 0.349 & 0.342 \\
+\texttt{PRODUCTION\_TSP\_BALANCE} & 2 & 0.340 & 0.339 \\
+\texttt{PRESSURE\_VAPEUR} & 10 & 0.327 & 0.323 \\
+\texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & 10 & 0.324 & 0.319 \\
+\texttt{TEMPERATURE\_GAZ\_SORTIE\_SECHEUR} & 2 & 0.314 & 0.314 \\
+\texttt{LEVEL\_CUVE\_PASSAGE} & 2 & 0.304 & 0.301 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+The lag improvements are present but small. This means the process has some delayed effects, but the simple lagged correlation method does not reveal a very strong single dead time. The best lags are mostly between 1 and 10 minutes.
+
+This is still meaningful in an industrial process. A one-minute or five-minute lag may represent:
+
+\begin{itemize}
+    \item material residence time,
+    \item analyzer response delay,
+    \item control-loop adjustment,
+    \item transportation delay between process units,
+    \item or the fact that variables are measured at different physical locations.
+\end{itemize}
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Include lagged variables at 1, 2, 3, 5, 10, 15, 30, and 60 minutes.
+    \item Include rolling means and rolling standard deviations to capture recent operating history.
+    \item Do not rely only on lag-0 features.
+    \item Use time-aware validation to confirm whether lagged features improve prediction on future data.
+    \item Investigate whether a different target sampling or lab/analyzer delay exists.
+\end{itemize}
+
+\section{Rolling Stability}
+
+\subsection{Observed Pattern}
+
+The one-hour rolling standard deviation of \texttt{SLURRY\_FREE\_ACID} has the following approximate quantiles:
+
+\begin{longtable}{lr}
+\toprule
+Quantile & One-Hour Rolling Std. \\
+\midrule
+50\% & 0.183 \\
+75\% & 0.213 \\
+90\% & 0.253 \\
+95\% & 0.299 \\
+99\% & 0.817 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+Most of the time, target volatility is low. The jump from the 95th percentile to the 99th percentile is large, showing that a small number of periods are much more unstable than normal operation.
+
+This confirms the idea that the process is usually stable, with occasional disturbance windows.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Build features that describe recent volatility.
+    \item Evaluate the model separately during stable and unstable windows.
+    \item Consider an alarm or anomaly layer before prediction if the objective includes operational monitoring.
+    \item During high-variability periods, a model may need different uncertainty bounds.
+\end{itemize}
+
+\section{Seasonality and Time-of-Day Patterns}
+
+\subsection{Observed Pattern}
+
+Hourly mean \texttt{SLURRY\_FREE\_ACID} varies between approximately 11.088 and 11.555.
+
+\begin{itemize}
+    \item Lowest hourly mean: hour 08, approximately 11.088.
+    \item Highest hourly mean: hour 01, approximately 11.555.
+    \item Hourly range: approximately 0.468.
+\end{itemize}
+
+Daily mean target varies more strongly:
+
+\begin{itemize}
+    \item Lowest daily mean: January 18, approximately 10.687.
+    \item Highest daily mean: January 9, approximately 12.026.
+    \item Daily range: approximately 1.339.
+\end{itemize}
+
+\subsection{Interpretation}
+
+The one-month dataset suggests that daily operating conditions vary more than average hour-of-day effects. Hourly patterns may reflect shifts, routines, sampling practices, or utility cycles, but the dataset is too short to make strong claims.
+
+January 9 and January 18 appear to be important days for process behavior. January 18 is especially notable because it contains both a very high target spike and a very low daily mean.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Add time features such as hour, day of week, and shift if operationally meaningful.
+    \item Do not overinterpret seasonality from one month.
+    \item Investigate plant logs for January 9, January 13, January 18, January 22, and January 28.
+    \item If more history is collected, test weekly and monthly patterns again.
+\end{itemize}
+
+\section{Sensor Stability and Health}
+
+\subsection{Stable Variables}
+
+The most stable variables by coefficient of variation include:
+
+\begin{longtable}{p{8cm}r}
+\toprule
+Variable & Coefficient of Variation \\
+\midrule
+\texttt{TEMPERATURE\_VAPEUR} & 0.035 \\
+\texttt{SLURRY\_FREE\_ACID} & 0.046 \\
+\texttt{TEMPERATURE\_CUVE\_ATTAQUE} & 0.106 \\
+\texttt{TEMPERATURE\_CUVE\_DE\_PASSAGE} & 0.110 \\
+\texttt{TEMPERATURE\_SLURRY\_PULVERISATEUR} & 0.110 \\
+\texttt{TEMPERATURE\_AIR\_CHAUD} & 0.110 \\
+\texttt{PRESSURE\_VAPEUR} & 0.125 \\
+\texttt{TEMPERATURE\_GAZ\_SORTIE\_SECHEUR} & 0.125 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Highly Variable Variables}
+
+The most variable variables include:
+
+\begin{longtable}{p{8cm}r}
+\toprule
+Variable & Coefficient of Variation \\
+\midrule
+\texttt{DEPRESSURE\_SECHEUR} & 0.869 \\
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR\_2} & 0.617 \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_1} & 0.445 \\
+\texttt{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & 0.298 \\
+\texttt{PRODUCTION\_TSP\_BALANCE} & 0.217 \\
+\texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & 0.217 \\
+\texttt{RECYCLAGE} & 0.216 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+Temperature and pressure variables are relatively stable, while flow-related variables vary more. This makes sense industrially: production load, feed rates, recycle, and fuel can change with operating rate, while many temperatures are controlled around setpoints.
+
+\texttt{FLOW\_RATE\_SLURRY\_M3\_HR\_2} has very high relative variation and weak correlation with the target. It should be reviewed to understand whether it is a secondary line, redundant sensor, noisy signal, or different measurement point.
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Stable temperature variables may still be useful, but mostly for detecting deviations from normal operation.
+    \item Highly variable flow variables are likely important for predicting operating regime.
+    \item Review redundant or alternate slurry flow sensors before modeling.
+    \item Use robust scaling for methods sensitive to variable scale.
+\end{itemize}
+
+\section{Multicollinearity and Redundant Sensors}
+
+\subsection{Observed Pattern}
+
+Many process variables are extremely correlated with each other. Examples with absolute correlation above 0.90 include:
+
+\begin{longtable}{p{7cm}p{7cm}r}
+\toprule
+Variable A & Variable B & Abs. Corr. \\
+\midrule
+\texttt{TEMPERATURE\_CUVE\_DE\_PASSAGE} & \texttt{TEMPERATURE\_SLURRY\_PULVERISATEUR} & 0.997 \\
+\texttt{TEMPERATURE\_CUVE\_ATTAQUE} & \texttt{TEMPERATURE\_CUVE\_DE\_PASSAGE} & 0.996 \\
+\texttt{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & \texttt{FLOW\_RATE\_SLURRY\_M3\_HR} & 0.996 \\
+\texttt{TEMPERATURE\_CUVE\_ATTAQUE} & \texttt{TEMPERATURE\_SLURRY\_PULVERISATEUR} & 0.993 \\
+\texttt{PRODUCTION\_TSP\_BALANCE} & \texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & 0.974 \\
+\texttt{FLOW\_RATE\_GROUND\_PHOSPHATE} & \texttt{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & 0.970 \\
+\texttt{TEMPERATURE\_AIR\_CHAUD} & \texttt{TEMPERATURE\_BRIQUE} & 0.969 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Interpretation}
+
+This is a strongly coupled industrial process. High correlation among variables may reflect:
+
+\begin{itemize}
+    \item common production load,
+    \item mass balance relationships,
+    \item multiple sensors measuring the same physical zone,
+    \item control loops moving variables together,
+    \item thermal coupling between reactor, dryer, and air temperature,
+    \item or redundant instrumentation.
+\end{itemize}
+
+\subsection{Consequence for Future Work}
+
+\begin{itemize}
+    \item Linear models may suffer from unstable coefficients due to multicollinearity.
+    \item Tree models are less sensitive to multicollinearity but feature importance may be split among correlated variables.
+    \item Feature selection should combine statistics and process knowledge.
+    \item Consider creating representative variables or ratios from highly correlated groups.
+    \item Do not interpret model coefficients as direct physical effects without handling collinearity.
+\end{itemize}
+
+\section{Feature Engineering Ideas}
+
+\subsection{Most Important Feature Families}
+
+Based on the observed patterns, future features should represent:
+
+\begin{enumerate}
+    \item \textbf{Mass balance}: acid flow, phosphate flow, slurry flow, production, and recycle.
+    \item \textbf{Thermal state}: steam pressure, steam temperature, fuel flow, hot air temperature, dryer outlet gas temperature, brick temperature.
+    \item \textbf{Residence-time memory}: lagged values at 1, 2, 3, 5, 10, 15, 30, and 60 minutes.
+    \item \textbf{Stability}: trailing rolling mean, standard deviation, minimum, maximum, and range.
+    \item \textbf{Disturbance dynamics}: first differences and percentage changes.
+    \item \textbf{Ratios}: acid-to-phosphate, recycle-to-phosphate, slurry density proxy, fuel-to-temperature proxy.
+    \item \textbf{Operating regime}: cluster labels or event flags if validated by process knowledge.
+\end{enumerate}
+
+\subsection{Specific Candidate Features}
+
+\begin{itemize}
+    \item \texttt{TOTAL\_PHOSPHORIC\_ACID\_FLOW}
+    \item \texttt{ACID\_TO\_PHOSPHATE\_RATIO}
+    \item \texttt{SLURRY\_DENSITY\_PROXY\_T\_PER\_M3}
+    \item \texttt{RECYCLE\_TO\_PHOSPHATE\_RATIO}
+    \item \texttt{FUEL\_TO\_HOT\_AIR\_TEMP\_RATIO}
+    \item \texttt{ATTACK\_TO\_PASSAGE\_TEMP\_DELTA}
+    \item lagged feed and recycle variables,
+    \item rolling target-free process history variables.
+\end{itemize}
+
+\subsection{Leakage Warning}
+
+The target \texttt{SLURRY\_FREE\_ACID} must never be used as an input feature when predicting itself at the same timestamp. If lagged target values are considered later, they must be used only in a valid forecasting setup where past target values are available at prediction time.
+
+\section{Machine Learning Consequences}
+
+\subsection{Recommended Modeling Direction}
+
+The dataset is suitable for a first predictive modeling notebook, but the modeling should be leakage-safe and time-aware.
+
+Recommended model sequence:
+
+\begin{enumerate}
+    \item Naive baseline using previous target value if available in a forecasting setting.
+    \item Linear regression, Ridge, or Elastic Net as transparent baselines.
+    \item Random Forest and Extra Trees for nonlinear baselines.
+    \item Gradient boosting models such as XGBoost, LightGBM, or CatBoost.
+\end{enumerate}
+
+\subsection{Recommended Validation}
+
+\begin{itemize}
+    \item Use chronological split.
+    \item Use rolling-origin validation when more data is available.
+    \item Evaluate normal and abnormal periods separately.
+    \item Track MAE, RMSE, $R^2$, and error quantiles.
+    \item Include prediction intervals or uncertainty estimates if we end up building a model that supports operational decisions.
+\end{itemize}
+
+\subsection{Preprocessing Recommendations}
+
+\begin{itemize}
+    \item Parse and sort timestamps.
+    \item Impute missing values using only training data.
+    \item Review negative values sensor by sensor.
+    \item Create event flags for abnormal target periods and suspicious sensor behavior.
+    \item if we work with PCA, clustering, linear models or distance-based models, we should scale features.
+    \item No centered rolling windows because they use future information.
+\end{itemize}
+
+\section{Industrial Understanding}
+
+\subsection{What the Data Suggests}
+
+The process appears to be usually stable around a free-acid operating center near 11.3. The main prediction challenge is not the normal center of the distribution; it is understanding and predicting deviations from that center.
+
+The strongest relationships are not purely acid-feed variables. Instead, free acid is associated with production load, recycle, steam, fuel, slurry flow, and dryer/thermal state. This suggests that \texttt{SLURRY\_FREE\_ACID} is a system-level quality result rather than a simple one-input response.
+
+\subsection{Most Important Questions for Process Engineers}
+
+\begin{enumerate}
+    \item What happened on January 18 around the extreme target spike?
+    \item Are the very high target values real laboratory/analyzer readings or data errors?
+    \item Are negative flow and production values meaningful shutdown indicators or sensor artifacts?
+    \item Which variables are manipulated by operators and which are only measured responses?
+    \item What is the expected residence time between acid/phosphate feed changes and slurry free acid response?
+    \item Is \texttt{FLOW\_RATE\_SLURRY\_M3\_HR\_2} a redundant sensor, secondary stream, or different measurement point?
+    \item Are January 9, January 13, January 18, January 22, and January 28 associated with known events?
+\end{enumerate}
+
+\section{Final Summary}
+
+\begin{itemize}
+    \item The dataset is structurally strong: one full month, one-minute sampling, no duplicate rows, and no duplicate timestamps.
+    \item Missing values are low, but should still be handled carefully in time-aware pipelines.
+    \item \texttt{SLURRY\_FREE\_ACID} is usually stable near 11.3 but has rare extreme deviations.
+    \item Outliers are industrially meaningful candidates, not automatic deletion candidates.
+    \item Many variables are moderately correlated with the target; no single variable dominates.
+    \item Lagged effects exist but are modest, mostly around 1 to 10 minutes.
+    \item Strong multicollinearity is present because the plant variables move together under common operating regimes.
+    \item Models should use lag features, rolling features, ratios, interaction terms, and time-aware validation.
+    \item The next technical step is a leakage-safe feature engineering and modeling notebook focused on predicting \texttt{SLURRY\_FREE\_ACID}.
+\end{itemize}
+
+\end{document}

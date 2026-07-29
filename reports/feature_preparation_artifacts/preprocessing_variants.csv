@@ -1,0 +1,5 @@
+variant,steps,intended_models
+tree,training-median imputation; no scaling,tree ensembles and gradient boosting
+robust,training-median imputation; RobustScaler,outlier-aware linear and neural baselines
+standard,training-median imputation; StandardScaler,"regularized linear models, PCA, diagnostics"
+minmax,training-median imputation; MinMaxScaler,bounded-input neural baselines

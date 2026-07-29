@@ -1,0 +1,4 @@
+candidate_role,horizon_min,feature_set,model,validation_rmse,test_rmse,persistence_improvement_pct,transition_candidate_rmse,feature_count,training_seconds,interpretability,uses_process_aware_features,operational_validation_burden,selection_basis
+accuracy_oriented,1,D_full,ridge,0.33479299479600494,0.3317622670535678,-67.88293350972903,0.33209233038165054,178,0.12125879991799593,high,True,higher,validation performance plus role constraint; test not used for selection
+interpretable,1,D_full,ridge,0.33479299479600494,0.3317622670535678,-67.88293350972903,0.33209233038165054,178,0.12125879991799593,high,True,higher,validation performance plus role constraint; test not used for selection
+early_warning,10,D_full,ridge,0.339868414002883,0.3435767969771984,-22.570643091149893,0.33864047524031243,178,0.12189189996570349,high,True,higher,validation performance plus role constraint; test not used for selection

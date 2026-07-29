@@ -1,0 +1,17 @@
+horizon_min,feature_set,candidate_features,retained_features,removed_features
+1,A_raw,21,21,0
+1,B_temporal,210,162,48
+1,C_process,58,58,0
+1,D_full,226,178,48
+5,A_raw,21,21,0
+5,B_temporal,210,162,48
+5,C_process,58,58,0
+5,D_full,226,178,48
+10,A_raw,21,21,0
+10,B_temporal,210,162,48
+10,C_process,58,58,0
+10,D_full,226,178,48
+15,A_raw,21,21,0
+15,B_temporal,210,162,48
+15,C_process,58,58,0
+15,D_full,226,178,48

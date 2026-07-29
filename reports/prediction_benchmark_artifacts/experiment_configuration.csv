@@ -1,0 +1,9 @@
+key,value
+horizons,"[1, 5, 10, 15]"
+feature_sets,"[""A_raw"", ""B_temporal"", ""C_process"", ""D_full""]"
+models,"[""ridge"", ""extra_trees"", ""hist_gradient_boosting""]"
+tuning_candidates_per_model,2
+random_state,42
+selection_metric,validation_rmse
+test_use,evaluation only after validation selection
+shuffling,False

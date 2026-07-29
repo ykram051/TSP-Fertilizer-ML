@@ -1,0 +1,17 @@
+horizon_min,experiment,feature_count,train_rows,valid_rows,test_rows
+1,A_exogenous_raw,21,30940,6628,6632
+1,D_exogenous_full,178,30940,6628,6632
+1,E_target_history,10,30940,6628,6632
+1,F_hybrid_full,188,30940,6628,6632
+5,A_exogenous_raw,21,30928,6624,6631
+5,D_exogenous_full,178,30928,6624,6631
+5,E_target_history,10,30928,6624,6631
+5,F_hybrid_full,188,30928,6624,6631
+10,A_exogenous_raw,21,30915,6618,6630
+10,D_exogenous_full,178,30915,6618,6630
+10,E_target_history,10,30915,6618,6630
+10,F_hybrid_full,188,30915,6618,6630
+15,A_exogenous_raw,21,30901,6612,6630
+15,D_exogenous_full,178,30901,6612,6630
+15,E_target_history,10,30901,6612,6630
+15,F_hybrid_full,188,30901,6612,6630

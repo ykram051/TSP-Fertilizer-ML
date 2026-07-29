@@ -1,0 +1,2 @@
+model,feature_set,members,weight_first,weight_second,valid_mae,valid_rmse,valid_median_ae,valid_r2,valid_bias,valid_p90_ae,valid_p95_ae,test_mae,test_rmse,test_median_ae,test_r2,test_bias,test_p90_ae,test_p95_ae
+validation_weighted_blend,mixed,"[[""D_full"", ""ridge""], [""D_full"", ""lightgbm""]]",0.5,0.5,0.25097025336015594,0.32066574808427095,0.21444289589284526,0.46400745868343674,0.09048472823432398,0.5028916906877158,0.5962575236265819,0.24901452331662022,0.301377449506971,0.2293408470618612,0.5583230746726539,0.01776152646259013,0.4587770568098533,0.5362728440494504

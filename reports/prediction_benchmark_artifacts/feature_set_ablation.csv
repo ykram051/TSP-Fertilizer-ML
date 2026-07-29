@@ -1,0 +1,17 @@
+horizon_min,comparison,base_set,enhanced_set,base_model,enhanced_model,test_rmse_change,test_rmse_improvement_pct,additional_features,training_seconds_change,validation_consistent_improvement
+1,A_vs_B_temporal_value,A_raw,B_temporal,ridge,ridge,-0.03889976164366249,10.191468789500734,141,0.12464789976365864,True
+1,A_vs_C_process_value,A_raw,C_process,ridge,extra_trees,-0.061804273692905254,16.19229269754726,37,2.8590979997534305,True
+1,B_vs_D_process_increment,B_temporal,D_full,ridge,ridge,-0.011027425954655445,3.216965439620411,16,-0.034120599972084165,True
+1,C_vs_D_temporal_increment,C_process,D_full,extra_trees,ridge,0.011877086094587319,-3.712921636126164,120,-2.768570699961856,True
+5,A_vs_B_temporal_value,A_raw,B_temporal,ridge,ridge,-0.034334466164195665,8.99249688292667,141,0.10531529993750155,True
+5,A_vs_C_process_value,A_raw,C_process,ridge,extra_trees,-0.07826787169534738,20.499039911902585,37,1.873927100095898,True
+5,B_vs_D_process_increment,B_temporal,D_full,ridge,ridge,-0.009701829360411807,2.792070816027754,16,-0.0015215000603348017,True
+5,C_vs_D_temporal_increment,C_process,D_full,extra_trees,ridge,0.03423157617073991,-11.277284053064978,120,-1.7701333002187312,True
+10,A_vs_B_temporal_value,A_raw,B_temporal,ridge,ridge,-0.03174659205235464,8.245858061050077,141,0.09698599996045232,True
+10,A_vs_C_process_value,A_raw,C_process,ridge,extra_trees,-0.049542380508382944,12.868135168806566,37,2.172747700009495,True
+10,B_vs_D_process_increment,B_temporal,D_full,ridge,ridge,-0.009677078081468726,2.739411727574564,16,0.0107551000546664,True
+10,C_vs_D_temporal_increment,C_process,D_full,extra_trees,ridge,0.008118710374559579,-2.4201862166394754,120,-2.0650065999943763,True
+15,A_vs_B_temporal_value,A_raw,B_temporal,ridge,ridge,-0.015623976094012837,3.8477256653504286,141,0.11923630000092089,True
+15,A_vs_C_process_value,A_raw,C_process,ridge,hist_gradient_boosting,-0.050711326791130995,12.488707896383653,37,0.8588612000457942,True
+15,B_vs_D_process_increment,B_temporal,D_full,ridge,ridge,-0.01257074513930545,3.219689525367854,16,-0.018940799869596958,True
+15,C_vs_D_temporal_increment,C_process,D_full,hist_gradient_boosting,ridge,0.022516605557812708,-6.3365279983660505,120,-0.7585656999144703,True

@@ -1,0 +1,5 @@
+feature_set,contents,hypothesis
+A_raw,Current sensor measurements only,The current process state alone contains sufficient predictive information.
+B_temporal,"Raw plus selected lags, rolling levels, variability, difference, slope, and genuine missingness indicators",Selected process histories and recent dynamics improve forecasting.
+C_process,"Raw plus balances, ratios, gradients, stability proxies, and genuine missingness indicators",Physically interpretable relationships improve prediction and generalization.
+D_full,Accepted temporal and process-aware features plus genuine missingness indicators,Temporal and process-relationship evidence are complementary.

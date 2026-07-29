@@ -1,0 +1,8 @@
+limitation,validation_requirement
+Only one month of one-minute data,"Test on additional months, seasons, campaigns, and product grades."
+Units are absent from the source CSV,Confirm every tag unit and calculation basis with process engineering.
+Process-aware features are proxies,"Validate stream pairing, sign conventions, and physical interpretation before operational use."
+No confirmed operational thresholds,Define warning and intervention thresholds with operations and quality teams.
+No variable is confirmed controllable,Authorize actuators explicitly before scenario or recommendation use.
+Adjacent observations are strongly dependent,"Use chronological evaluation, persistence baselines, and transition-specific diagnostics."
+No predictive benchmark is trained here,Compare against persistence and simple baselines at every horizon.

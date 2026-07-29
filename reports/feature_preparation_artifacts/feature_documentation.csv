@@ -1,0 +1,206 @@
+feature,family,source_variable,reason
+PRODUCTION_TSP_BALANCE,raw,PRODUCTION_TSP_BALANCE,Current measurement at t.
+PRODUCTION_TSP_BALANCE_lag_1,selected_lag,PRODUCTION_TSP_BALANCE,Selected 1-minute response delay from training-only evidence and process prior.
+PRODUCTION_TSP_BALANCE_lag_5,selected_lag,PRODUCTION_TSP_BALANCE,Selected 5-minute response delay from training-only evidence and process prior.
+PRODUCTION_TSP_BALANCE_lag_10,selected_lag,PRODUCTION_TSP_BALANCE,Selected 10-minute response delay from training-only evidence and process prior.
+PRODUCTION_TSP_BALANCE_roll_mean_10,rolling_mean,PRODUCTION_TSP_BALANCE,Short trailing level.
+PRODUCTION_TSP_BALANCE_roll_mean_30,rolling_mean,PRODUCTION_TSP_BALANCE,Medium trailing level.
+PRODUCTION_TSP_BALANCE_roll_std_10,variability,PRODUCTION_TSP_BALANCE,Short-term variability.
+PRODUCTION_TSP_BALANCE_diff_5,difference,PRODUCTION_TSP_BALANCE,Five-minute movement.
+PRODUCTION_TSP_BALANCE_slope_10,trend,PRODUCTION_TSP_BALANCE,Ten-minute linear trend.
+FLOW_RATE_PHOSPHORIC_ACID_1,raw,FLOW_RATE_PHOSPHORIC_ACID_1,Current measurement at t.
+FLOW_RATE_PHOSPHORIC_ACID_1_lag_1,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_1,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_1_lag_5,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_1,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_1_lag_10,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_1,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_1_roll_mean_10,rolling_mean,FLOW_RATE_PHOSPHORIC_ACID_1,Short trailing level.
+FLOW_RATE_PHOSPHORIC_ACID_1_roll_mean_30,rolling_mean,FLOW_RATE_PHOSPHORIC_ACID_1,Medium trailing level.
+FLOW_RATE_PHOSPHORIC_ACID_1_roll_std_10,variability,FLOW_RATE_PHOSPHORIC_ACID_1,Short-term variability.
+FLOW_RATE_PHOSPHORIC_ACID_1_diff_5,difference,FLOW_RATE_PHOSPHORIC_ACID_1,Five-minute movement.
+FLOW_RATE_PHOSPHORIC_ACID_1_slope_10,trend,FLOW_RATE_PHOSPHORIC_ACID_1,Ten-minute linear trend.
+FLOW_RATE_PHOSPHORIC_ACID_2,raw,FLOW_RATE_PHOSPHORIC_ACID_2,Current measurement at t.
+FLOW_RATE_PHOSPHORIC_ACID_2_lag_1,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_2,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_2_lag_5,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_2,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_2_lag_10,selected_lag,FLOW_RATE_PHOSPHORIC_ACID_2,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_PHOSPHORIC_ACID_2_roll_mean_10,rolling_mean,FLOW_RATE_PHOSPHORIC_ACID_2,Short trailing level.
+FLOW_RATE_PHOSPHORIC_ACID_2_roll_mean_30,rolling_mean,FLOW_RATE_PHOSPHORIC_ACID_2,Medium trailing level.
+FLOW_RATE_PHOSPHORIC_ACID_2_roll_std_10,variability,FLOW_RATE_PHOSPHORIC_ACID_2,Short-term variability.
+FLOW_RATE_PHOSPHORIC_ACID_2_diff_5,difference,FLOW_RATE_PHOSPHORIC_ACID_2,Five-minute movement.
+FLOW_RATE_PHOSPHORIC_ACID_2_slope_10,trend,FLOW_RATE_PHOSPHORIC_ACID_2,Ten-minute linear trend.
+FLOW_RATE_GROUND_PHOSPHATE,raw,FLOW_RATE_GROUND_PHOSPHATE,Current measurement at t.
+FLOW_RATE_GROUND_PHOSPHATE_lag_1,selected_lag,FLOW_RATE_GROUND_PHOSPHATE,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_GROUND_PHOSPHATE_lag_5,selected_lag,FLOW_RATE_GROUND_PHOSPHATE,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_GROUND_PHOSPHATE_lag_10,selected_lag,FLOW_RATE_GROUND_PHOSPHATE,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_GROUND_PHOSPHATE_roll_mean_10,rolling_mean,FLOW_RATE_GROUND_PHOSPHATE,Short trailing level.
+FLOW_RATE_GROUND_PHOSPHATE_roll_mean_30,rolling_mean,FLOW_RATE_GROUND_PHOSPHATE,Medium trailing level.
+FLOW_RATE_GROUND_PHOSPHATE_roll_std_10,variability,FLOW_RATE_GROUND_PHOSPHATE,Short-term variability.
+FLOW_RATE_GROUND_PHOSPHATE_diff_5,difference,FLOW_RATE_GROUND_PHOSPHATE,Five-minute movement.
+FLOW_RATE_GROUND_PHOSPHATE_slope_10,trend,FLOW_RATE_GROUND_PHOSPHATE,Ten-minute linear trend.
+FLOW_RATE_SLURRY_T_PER_HR,raw,FLOW_RATE_SLURRY_T_PER_HR,Current measurement at t.
+FLOW_RATE_SLURRY_T_PER_HR_lag_1,selected_lag,FLOW_RATE_SLURRY_T_PER_HR,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_T_PER_HR_lag_5,selected_lag,FLOW_RATE_SLURRY_T_PER_HR,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_T_PER_HR_lag_10,selected_lag,FLOW_RATE_SLURRY_T_PER_HR,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_T_PER_HR_roll_mean_10,rolling_mean,FLOW_RATE_SLURRY_T_PER_HR,Short trailing level.
+FLOW_RATE_SLURRY_T_PER_HR_roll_mean_30,rolling_mean,FLOW_RATE_SLURRY_T_PER_HR,Medium trailing level.
+FLOW_RATE_SLURRY_T_PER_HR_roll_std_10,variability,FLOW_RATE_SLURRY_T_PER_HR,Short-term variability.
+FLOW_RATE_SLURRY_T_PER_HR_diff_5,difference,FLOW_RATE_SLURRY_T_PER_HR,Five-minute movement.
+FLOW_RATE_SLURRY_T_PER_HR_slope_10,trend,FLOW_RATE_SLURRY_T_PER_HR,Ten-minute linear trend.
+FLOW_RATE_SLURRY_M3_HR,raw,FLOW_RATE_SLURRY_M3_HR,Current measurement at t.
+FLOW_RATE_SLURRY_M3_HR_lag_1,selected_lag,FLOW_RATE_SLURRY_M3_HR,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_lag_5,selected_lag,FLOW_RATE_SLURRY_M3_HR,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_lag_10,selected_lag,FLOW_RATE_SLURRY_M3_HR,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_roll_mean_10,rolling_mean,FLOW_RATE_SLURRY_M3_HR,Short trailing level.
+FLOW_RATE_SLURRY_M3_HR_roll_mean_30,rolling_mean,FLOW_RATE_SLURRY_M3_HR,Medium trailing level.
+FLOW_RATE_SLURRY_M3_HR_roll_std_10,variability,FLOW_RATE_SLURRY_M3_HR,Short-term variability.
+FLOW_RATE_SLURRY_M3_HR_diff_5,difference,FLOW_RATE_SLURRY_M3_HR,Five-minute movement.
+FLOW_RATE_SLURRY_M3_HR_slope_10,trend,FLOW_RATE_SLURRY_M3_HR,Ten-minute linear trend.
+RECYCLAGE,raw,RECYCLAGE,Current measurement at t.
+RECYCLAGE_lag_1,selected_lag,RECYCLAGE,Selected 1-minute response delay from training-only evidence and process prior.
+RECYCLAGE_lag_5,selected_lag,RECYCLAGE,Selected 5-minute response delay from training-only evidence and process prior.
+RECYCLAGE_lag_10,selected_lag,RECYCLAGE,Selected 10-minute response delay from training-only evidence and process prior.
+RECYCLAGE_roll_mean_10,rolling_mean,RECYCLAGE,Short trailing level.
+RECYCLAGE_roll_mean_30,rolling_mean,RECYCLAGE,Medium trailing level.
+RECYCLAGE_roll_std_10,variability,RECYCLAGE,Short-term variability.
+RECYCLAGE_diff_5,difference,RECYCLAGE,Five-minute movement.
+RECYCLAGE_slope_10,trend,RECYCLAGE,Ten-minute linear trend.
+PRESSURE_VAPEUR,raw,PRESSURE_VAPEUR,Current measurement at t.
+PRESSURE_VAPEUR_lag_1,selected_lag,PRESSURE_VAPEUR,Selected 1-minute response delay from training-only evidence and process prior.
+PRESSURE_VAPEUR_lag_5,selected_lag,PRESSURE_VAPEUR,Selected 5-minute response delay from training-only evidence and process prior.
+PRESSURE_VAPEUR_lag_10,selected_lag,PRESSURE_VAPEUR,Selected 10-minute response delay from training-only evidence and process prior.
+PRESSURE_VAPEUR_roll_mean_10,rolling_mean,PRESSURE_VAPEUR,Short trailing level.
+PRESSURE_VAPEUR_roll_mean_30,rolling_mean,PRESSURE_VAPEUR,Medium trailing level.
+PRESSURE_VAPEUR_roll_std_10,variability,PRESSURE_VAPEUR,Short-term variability.
+PRESSURE_VAPEUR_diff_5,difference,PRESSURE_VAPEUR,Five-minute movement.
+PRESSURE_VAPEUR_slope_10,trend,PRESSURE_VAPEUR,Ten-minute linear trend.
+TEMPERATURE_VAPEUR,raw,TEMPERATURE_VAPEUR,Current measurement at t.
+TEMPERATURE_VAPEUR_lag_1,selected_lag,TEMPERATURE_VAPEUR,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_VAPEUR_lag_5,selected_lag,TEMPERATURE_VAPEUR,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_VAPEUR_lag_10,selected_lag,TEMPERATURE_VAPEUR,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_VAPEUR_roll_mean_10,rolling_mean,TEMPERATURE_VAPEUR,Short trailing level.
+TEMPERATURE_VAPEUR_roll_mean_30,rolling_mean,TEMPERATURE_VAPEUR,Medium trailing level.
+TEMPERATURE_VAPEUR_roll_std_10,variability,TEMPERATURE_VAPEUR,Short-term variability.
+TEMPERATURE_VAPEUR_diff_5,difference,TEMPERATURE_VAPEUR,Five-minute movement.
+TEMPERATURE_VAPEUR_slope_10,trend,TEMPERATURE_VAPEUR,Ten-minute linear trend.
+TEMPERATURE_CUVE_ATTAQUE,raw,TEMPERATURE_CUVE_ATTAQUE,Current measurement at t.
+TEMPERATURE_CUVE_ATTAQUE_lag_5,selected_lag,TEMPERATURE_CUVE_ATTAQUE,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_ATTAQUE_lag_10,selected_lag,TEMPERATURE_CUVE_ATTAQUE,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_ATTAQUE_lag_15,selected_lag,TEMPERATURE_CUVE_ATTAQUE,Selected 15-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_ATTAQUE_roll_mean_10,rolling_mean,TEMPERATURE_CUVE_ATTAQUE,Short trailing level.
+TEMPERATURE_CUVE_ATTAQUE_roll_mean_30,rolling_mean,TEMPERATURE_CUVE_ATTAQUE,Medium trailing level.
+TEMPERATURE_CUVE_ATTAQUE_roll_std_10,variability,TEMPERATURE_CUVE_ATTAQUE,Short-term variability.
+TEMPERATURE_CUVE_ATTAQUE_diff_5,difference,TEMPERATURE_CUVE_ATTAQUE,Five-minute movement.
+TEMPERATURE_CUVE_ATTAQUE_slope_10,trend,TEMPERATURE_CUVE_ATTAQUE,Ten-minute linear trend.
+TEMPERATURE_CUVE_DE_PASSAGE,raw,TEMPERATURE_CUVE_DE_PASSAGE,Current measurement at t.
+TEMPERATURE_CUVE_DE_PASSAGE_lag_1,selected_lag,TEMPERATURE_CUVE_DE_PASSAGE,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_DE_PASSAGE_lag_5,selected_lag,TEMPERATURE_CUVE_DE_PASSAGE,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_DE_PASSAGE_lag_10,selected_lag,TEMPERATURE_CUVE_DE_PASSAGE,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_CUVE_DE_PASSAGE_roll_mean_10,rolling_mean,TEMPERATURE_CUVE_DE_PASSAGE,Short trailing level.
+TEMPERATURE_CUVE_DE_PASSAGE_roll_mean_30,rolling_mean,TEMPERATURE_CUVE_DE_PASSAGE,Medium trailing level.
+TEMPERATURE_CUVE_DE_PASSAGE_roll_std_10,variability,TEMPERATURE_CUVE_DE_PASSAGE,Short-term variability.
+TEMPERATURE_CUVE_DE_PASSAGE_diff_5,difference,TEMPERATURE_CUVE_DE_PASSAGE,Five-minute movement.
+TEMPERATURE_CUVE_DE_PASSAGE_slope_10,trend,TEMPERATURE_CUVE_DE_PASSAGE,Ten-minute linear trend.
+TEMPERATURE_SLURRY_PULVERISATEUR,raw,TEMPERATURE_SLURRY_PULVERISATEUR,Current measurement at t.
+TEMPERATURE_SLURRY_PULVERISATEUR_lag_1,selected_lag,TEMPERATURE_SLURRY_PULVERISATEUR,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_SLURRY_PULVERISATEUR_lag_5,selected_lag,TEMPERATURE_SLURRY_PULVERISATEUR,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_SLURRY_PULVERISATEUR_lag_10,selected_lag,TEMPERATURE_SLURRY_PULVERISATEUR,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_SLURRY_PULVERISATEUR_roll_mean_10,rolling_mean,TEMPERATURE_SLURRY_PULVERISATEUR,Short trailing level.
+TEMPERATURE_SLURRY_PULVERISATEUR_roll_mean_30,rolling_mean,TEMPERATURE_SLURRY_PULVERISATEUR,Medium trailing level.
+TEMPERATURE_SLURRY_PULVERISATEUR_roll_std_10,variability,TEMPERATURE_SLURRY_PULVERISATEUR,Short-term variability.
+TEMPERATURE_SLURRY_PULVERISATEUR_diff_5,difference,TEMPERATURE_SLURRY_PULVERISATEUR,Five-minute movement.
+TEMPERATURE_SLURRY_PULVERISATEUR_slope_10,trend,TEMPERATURE_SLURRY_PULVERISATEUR,Ten-minute linear trend.
+DEPRESSURE_SECHEUR,raw,DEPRESSURE_SECHEUR,Current measurement at t.
+DEPRESSURE_SECHEUR_lag_1,selected_lag,DEPRESSURE_SECHEUR,Selected 1-minute response delay from training-only evidence and process prior.
+DEPRESSURE_SECHEUR_lag_5,selected_lag,DEPRESSURE_SECHEUR,Selected 5-minute response delay from training-only evidence and process prior.
+DEPRESSURE_SECHEUR_lag_10,selected_lag,DEPRESSURE_SECHEUR,Selected 10-minute response delay from training-only evidence and process prior.
+DEPRESSURE_SECHEUR_roll_mean_10,rolling_mean,DEPRESSURE_SECHEUR,Short trailing level.
+DEPRESSURE_SECHEUR_roll_mean_30,rolling_mean,DEPRESSURE_SECHEUR,Medium trailing level.
+DEPRESSURE_SECHEUR_roll_std_10,variability,DEPRESSURE_SECHEUR,Short-term variability.
+DEPRESSURE_SECHEUR_diff_5,difference,DEPRESSURE_SECHEUR,Five-minute movement.
+DEPRESSURE_SECHEUR_slope_10,trend,DEPRESSURE_SECHEUR,Ten-minute linear trend.
+LEVEL_CUVE_PASSAGE,raw,LEVEL_CUVE_PASSAGE,Current measurement at t.
+LEVEL_CUVE_PASSAGE_lag_1,selected_lag,LEVEL_CUVE_PASSAGE,Selected 1-minute response delay from training-only evidence and process prior.
+LEVEL_CUVE_PASSAGE_lag_5,selected_lag,LEVEL_CUVE_PASSAGE,Selected 5-minute response delay from training-only evidence and process prior.
+LEVEL_CUVE_PASSAGE_lag_10,selected_lag,LEVEL_CUVE_PASSAGE,Selected 10-minute response delay from training-only evidence and process prior.
+LEVEL_CUVE_PASSAGE_roll_mean_10,rolling_mean,LEVEL_CUVE_PASSAGE,Short trailing level.
+LEVEL_CUVE_PASSAGE_roll_mean_30,rolling_mean,LEVEL_CUVE_PASSAGE,Medium trailing level.
+LEVEL_CUVE_PASSAGE_roll_std_10,variability,LEVEL_CUVE_PASSAGE,Short-term variability.
+LEVEL_CUVE_PASSAGE_diff_5,difference,LEVEL_CUVE_PASSAGE,Five-minute movement.
+LEVEL_CUVE_PASSAGE_slope_10,trend,LEVEL_CUVE_PASSAGE,Ten-minute linear trend.
+TEMPERATURE_GAZ_SORTIE_SECHEUR,raw,TEMPERATURE_GAZ_SORTIE_SECHEUR,Current measurement at t.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_lag_1,selected_lag,TEMPERATURE_GAZ_SORTIE_SECHEUR,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_lag_5,selected_lag,TEMPERATURE_GAZ_SORTIE_SECHEUR,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_lag_10,selected_lag,TEMPERATURE_GAZ_SORTIE_SECHEUR,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_roll_mean_10,rolling_mean,TEMPERATURE_GAZ_SORTIE_SECHEUR,Short trailing level.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_roll_mean_30,rolling_mean,TEMPERATURE_GAZ_SORTIE_SECHEUR,Medium trailing level.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_roll_std_10,variability,TEMPERATURE_GAZ_SORTIE_SECHEUR,Short-term variability.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_diff_5,difference,TEMPERATURE_GAZ_SORTIE_SECHEUR,Five-minute movement.
+TEMPERATURE_GAZ_SORTIE_SECHEUR_slope_10,trend,TEMPERATURE_GAZ_SORTIE_SECHEUR,Ten-minute linear trend.
+FLOW_RATE_FIOUL,raw,FLOW_RATE_FIOUL,Current measurement at t.
+FLOW_RATE_FIOUL_lag_1,selected_lag,FLOW_RATE_FIOUL,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_FIOUL_lag_5,selected_lag,FLOW_RATE_FIOUL,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_FIOUL_lag_10,selected_lag,FLOW_RATE_FIOUL,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_FIOUL_roll_mean_10,rolling_mean,FLOW_RATE_FIOUL,Short trailing level.
+FLOW_RATE_FIOUL_roll_mean_30,rolling_mean,FLOW_RATE_FIOUL,Medium trailing level.
+FLOW_RATE_FIOUL_roll_std_10,variability,FLOW_RATE_FIOUL,Short-term variability.
+FLOW_RATE_FIOUL_diff_5,difference,FLOW_RATE_FIOUL,Five-minute movement.
+FLOW_RATE_FIOUL_slope_10,trend,FLOW_RATE_FIOUL,Ten-minute linear trend.
+TEMPERATURE_AIR_CHAUD,raw,TEMPERATURE_AIR_CHAUD,Current measurement at t.
+TEMPERATURE_AIR_CHAUD_lag_1,selected_lag,TEMPERATURE_AIR_CHAUD,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_AIR_CHAUD_lag_5,selected_lag,TEMPERATURE_AIR_CHAUD,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_AIR_CHAUD_lag_10,selected_lag,TEMPERATURE_AIR_CHAUD,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_AIR_CHAUD_roll_mean_10,rolling_mean,TEMPERATURE_AIR_CHAUD,Short trailing level.
+TEMPERATURE_AIR_CHAUD_roll_mean_30,rolling_mean,TEMPERATURE_AIR_CHAUD,Medium trailing level.
+TEMPERATURE_AIR_CHAUD_roll_std_10,variability,TEMPERATURE_AIR_CHAUD,Short-term variability.
+TEMPERATURE_AIR_CHAUD_diff_5,difference,TEMPERATURE_AIR_CHAUD,Five-minute movement.
+TEMPERATURE_AIR_CHAUD_slope_10,trend,TEMPERATURE_AIR_CHAUD,Ten-minute linear trend.
+FLOW_RATE_LIQUIDE_LAVAGE,raw,FLOW_RATE_LIQUIDE_LAVAGE,Current measurement at t.
+FLOW_RATE_LIQUIDE_LAVAGE_lag_1,selected_lag,FLOW_RATE_LIQUIDE_LAVAGE,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_LIQUIDE_LAVAGE_lag_5,selected_lag,FLOW_RATE_LIQUIDE_LAVAGE,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_LIQUIDE_LAVAGE_lag_10,selected_lag,FLOW_RATE_LIQUIDE_LAVAGE,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_LIQUIDE_LAVAGE_roll_mean_10,rolling_mean,FLOW_RATE_LIQUIDE_LAVAGE,Short trailing level.
+FLOW_RATE_LIQUIDE_LAVAGE_roll_mean_30,rolling_mean,FLOW_RATE_LIQUIDE_LAVAGE,Medium trailing level.
+FLOW_RATE_LIQUIDE_LAVAGE_roll_std_10,variability,FLOW_RATE_LIQUIDE_LAVAGE,Short-term variability.
+FLOW_RATE_LIQUIDE_LAVAGE_diff_5,difference,FLOW_RATE_LIQUIDE_LAVAGE,Five-minute movement.
+FLOW_RATE_LIQUIDE_LAVAGE_slope_10,trend,FLOW_RATE_LIQUIDE_LAVAGE,Ten-minute linear trend.
+FLOW_RATE_VAPEUR,raw,FLOW_RATE_VAPEUR,Current measurement at t.
+FLOW_RATE_VAPEUR_lag_1,selected_lag,FLOW_RATE_VAPEUR,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_VAPEUR_lag_5,selected_lag,FLOW_RATE_VAPEUR,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_VAPEUR_lag_10,selected_lag,FLOW_RATE_VAPEUR,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_VAPEUR_roll_mean_10,rolling_mean,FLOW_RATE_VAPEUR,Short trailing level.
+FLOW_RATE_VAPEUR_roll_mean_30,rolling_mean,FLOW_RATE_VAPEUR,Medium trailing level.
+FLOW_RATE_VAPEUR_roll_std_10,variability,FLOW_RATE_VAPEUR,Short-term variability.
+FLOW_RATE_VAPEUR_diff_5,difference,FLOW_RATE_VAPEUR,Five-minute movement.
+FLOW_RATE_VAPEUR_slope_10,trend,FLOW_RATE_VAPEUR,Ten-minute linear trend.
+FLOW_RATE_SLURRY_M3_HR_2,raw,FLOW_RATE_SLURRY_M3_HR_2,Current measurement at t.
+FLOW_RATE_SLURRY_M3_HR_2_lag_1,selected_lag,FLOW_RATE_SLURRY_M3_HR_2,Selected 1-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_2_lag_5,selected_lag,FLOW_RATE_SLURRY_M3_HR_2,Selected 5-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_2_lag_10,selected_lag,FLOW_RATE_SLURRY_M3_HR_2,Selected 10-minute response delay from training-only evidence and process prior.
+FLOW_RATE_SLURRY_M3_HR_2_roll_mean_10,rolling_mean,FLOW_RATE_SLURRY_M3_HR_2,Short trailing level.
+FLOW_RATE_SLURRY_M3_HR_2_roll_mean_30,rolling_mean,FLOW_RATE_SLURRY_M3_HR_2,Medium trailing level.
+FLOW_RATE_SLURRY_M3_HR_2_roll_std_10,variability,FLOW_RATE_SLURRY_M3_HR_2,Short-term variability.
+FLOW_RATE_SLURRY_M3_HR_2_diff_5,difference,FLOW_RATE_SLURRY_M3_HR_2,Five-minute movement.
+FLOW_RATE_SLURRY_M3_HR_2_slope_10,trend,FLOW_RATE_SLURRY_M3_HR_2,Ten-minute linear trend.
+TEMPERATURE_BRIQUE,raw,TEMPERATURE_BRIQUE,Current measurement at t.
+TEMPERATURE_BRIQUE_lag_1,selected_lag,TEMPERATURE_BRIQUE,Selected 1-minute response delay from training-only evidence and process prior.
+TEMPERATURE_BRIQUE_lag_5,selected_lag,TEMPERATURE_BRIQUE,Selected 5-minute response delay from training-only evidence and process prior.
+TEMPERATURE_BRIQUE_lag_10,selected_lag,TEMPERATURE_BRIQUE,Selected 10-minute response delay from training-only evidence and process prior.
+TEMPERATURE_BRIQUE_roll_mean_10,rolling_mean,TEMPERATURE_BRIQUE,Short trailing level.
+TEMPERATURE_BRIQUE_roll_mean_30,rolling_mean,TEMPERATURE_BRIQUE,Medium trailing level.
+TEMPERATURE_BRIQUE_roll_std_10,variability,TEMPERATURE_BRIQUE,Short-term variability.
+TEMPERATURE_BRIQUE_diff_5,difference,TEMPERATURE_BRIQUE,Five-minute movement.
+TEMPERATURE_BRIQUE_slope_10,trend,TEMPERATURE_BRIQUE,Ten-minute linear trend.
+TOTAL_ACID_FLOW,process_aware,multiple,Combined phosphoric-acid feed across both lines.
+ACID_FLOW_IMBALANCE,process_aware,multiple,Magnitude of line imbalance.
+ACID_TO_PHOSPHATE_RATIO,process_aware,multiple,Feed-ratio proxy related to acidulation conditions.
+TOTAL_SLURRY_M3_FLOW,process_aware,multiple,Confirmed total slurry volumetric flow in m3/h.
+SLURRY_DENSITY_PROXY,process_aware,multiple,Apparent slurry mass-per-volume proxy using total volumetric flow.
+ATTACK_PASSAGE_TEMP_GRADIENT,process_aware,multiple,Thermal change between reaction vessels.
+HOT_AIR_DRYER_OUTLET_GRADIENT,process_aware,multiple,Dryer thermal-driving-force proxy.
+STEAM_SLURRY_TEMP_GRADIENT,process_aware,multiple,Available temperature-gap proxy.
+STEAM_ENERGY_PROXY,process_aware,multiple,"Steam-condition proxy, not energy or enthalpy."
+DRYING_INTENSITY_PROXY,process_aware,multiple,Composite burner/load/draft indicator.
+RECYCLE_TO_PRODUCTION_RATIO,process_aware,multiple,Recycle-intensity proxy.
+FLOW_RATE_PHOSPHORIC_ACID_1_CV_10,process_aware,multiple,Scale-normalized ten-minute flow instability.
+FLOW_RATE_PHOSPHORIC_ACID_2_CV_10,process_aware,multiple,Scale-normalized ten-minute flow instability.
+FLOW_RATE_GROUND_PHOSPHATE_CV_10,process_aware,multiple,Scale-normalized ten-minute flow instability.
+FLOW_RATE_FIOUL_CV_10,process_aware,multiple,Scale-normalized ten-minute flow instability.
+FLOW_RATE_VAPEUR_CV_10,process_aware,multiple,Scale-normalized ten-minute flow instability.

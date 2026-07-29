@@ -1,0 +1,17 @@
+horizon_min,feature_set,chronological,aligned,no_missing,no_future_target,feature_count
+1,A_raw,True,True,True,True,21
+1,B_temporal,True,True,True,True,162
+1,C_process,True,True,True,True,58
+1,D_full,True,True,True,True,178
+5,A_raw,True,True,True,True,21
+5,B_temporal,True,True,True,True,162
+5,C_process,True,True,True,True,58
+5,D_full,True,True,True,True,178
+10,A_raw,True,True,True,True,21
+10,B_temporal,True,True,True,True,162
+10,C_process,True,True,True,True,58
+10,D_full,True,True,True,True,178
+15,A_raw,True,True,True,True,21
+15,B_temporal,True,True,True,True,162
+15,C_process,True,True,True,True,58
+15,D_full,True,True,True,True,178

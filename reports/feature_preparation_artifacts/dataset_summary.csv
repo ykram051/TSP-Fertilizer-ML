@@ -1,0 +1,2 @@
+source_file,raw_rows,numeric_sensors_excluding_target,missing_target_rows,start_timestamp,end_timestamp,sampling_interval,coverage
+tsp_1min.csv,44640,21,308,2026-01-01 00:00:00+00:00,2026-01-31 23:59:00+00:00,1 minute,31 days

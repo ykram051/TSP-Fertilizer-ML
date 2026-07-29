@@ -1,0 +1,17 @@
+horizon_min,feature_set,chronological,target_absent,future_targets_absent,columns_aligned,no_postprocess_missing,four_fitted_preprocessors,feature_count,train_rows,valid_rows,test_rows
+1,A_raw,True,True,True,True,True,True,21,31011,6645,6646
+1,B_temporal,True,True,True,True,True,True,162,31011,6645,6646
+1,C_process,True,True,True,True,True,True,58,31011,6645,6646
+1,D_full,True,True,True,True,True,True,178,31011,6645,6646
+5,A_raw,True,True,True,True,True,True,21,31008,6645,6645
+5,B_temporal,True,True,True,True,True,True,162,31008,6645,6645
+5,C_process,True,True,True,True,True,True,58,31008,6645,6645
+5,D_full,True,True,True,True,True,True,178,31008,6645,6645
+10,A_raw,True,True,True,True,True,True,21,31005,6644,6644
+10,B_temporal,True,True,True,True,True,True,162,31005,6644,6644
+10,C_process,True,True,True,True,True,True,58,31005,6644,6644
+10,D_full,True,True,True,True,True,True,178,31005,6644,6644
+15,A_raw,True,True,True,True,True,True,21,31001,6643,6644
+15,B_temporal,True,True,True,True,True,True,162,31001,6643,6644
+15,C_process,True,True,True,True,True,True,58,31001,6643,6644
+15,D_full,True,True,True,True,True,True,178,31001,6643,6644

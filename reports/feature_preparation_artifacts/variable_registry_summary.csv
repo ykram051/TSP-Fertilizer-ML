@@ -1,0 +1,10 @@
+primary_category,role,variable_count
+flow,candidate_actuator_not_confirmed,6
+flow,observed_state,3
+observed_state,observed_state,1
+possible_quality_indicator,target,1
+pressure,candidate_actuator_not_confirmed,1
+pressure,observed_state,1
+production,observed_state,1
+production,uncertain_role,1
+thermal,observed_state,7

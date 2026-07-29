@@ -1,0 +1,5 @@
+horizon_min,experiment,model,feature_count,valid_rmse,test_rmse,test_improvement_over_persistence_pct,test_transition_rmse,training_seconds,reaction_time_min,beats_persistence_test,uses_target_history,uses_provisional_process_features,interpretability,operational_status
+1,F_hybrid_full,ridge,188,0.16608059102207734,0.1511730529494148,23.16688237553796,0.30107703714040174,0.1823197000194341,1,True,True,True,high,candidate_for_further_validation
+5,F_hybrid_full,ridge,188,0.17893165851272522,0.16865624325564246,32.300440526922216,0.3395783609555663,0.1697733998298645,5,True,True,True,high,candidate_for_further_validation
+10,F_hybrid_full,ridge,188,0.18324452830855964,0.18204462308903768,34.92746521638804,0.38354936482526175,0.1852470999583602,10,True,True,True,high,candidate_for_further_validation
+15,F_hybrid_full,ridge,188,0.24173609733688323,0.23732391581517825,19.827178504742214,0.4877317032114439,0.2735977000556886,15,True,True,True,high,candidate_for_further_validation

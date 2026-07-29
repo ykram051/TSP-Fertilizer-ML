@@ -1,0 +1,2 @@
+nominal_coverage,validation_quantile,test_empirical_coverage,mean_interval_width,coverage_in_envelope,coverage_outside_envelope
+0.9,0.5074932124619647,0.896562123039807,1.0149864249239293,0.9015441064057483,0.5384615384615384

@@ -1,0 +1,7 @@
+item,detail
+required,Timestamp plus the 21 original process measurements expected by Notebook 02
+forbidden,"SLURRY_FREE_ACID, its lags, rolling values, future targets, or predictions used as target substitutes"
+warmup,Drop the first 30 rows required by accepted temporal features
+preprocessing,"Apply saved Notebook 02 feature construction, filtering, imputation, clipping and scaling without refitting"
+output,"Point estimate, empirical 90% interval, drift score, and outside-envelope flag"
+fail_safe,Do not trust predictions when required columns are absent or grossly outside the training envelope

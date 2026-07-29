@@ -1,0 +1,13 @@
+horizon_min,comparison,base_experiment,enhanced_experiment,base_model,enhanced_model,base_test_rmse,enhanced_test_rmse,rmse_improvement_pct,additional_features,additional_training_seconds
+1,accepted_features_over_raw,A_exogenous_raw,D_exogenous_full,ridge,ridge,0.19575697679131618,0.17072003060330299,12.789810405941985,157,0.12695820024237037
+1,process_over_target_history,E_target_history,F_hybrid_full,extra_trees,ridge,0.16689980509119468,0.1511730529494148,9.42287028626949,178,-0.6500061999540776
+1,target_history_over_exogenous,D_exogenous_full,F_hybrid_full,ridge,ridge,0.17072003060330299,0.1511730529494148,11.449727126226279,10,0.01440249988809228
+5,accepted_features_over_raw,A_exogenous_raw,D_exogenous_full,ridge,ridge,0.24243697241348725,0.18369792569850144,24.22858449774884,157,0.13791500008665025
+5,process_over_target_history,E_target_history,F_hybrid_full,ridge,ridge,0.2188295544445964,0.16865624325564246,22.92803242061935,178,0.16123749990947545
+5,target_history_over_exogenous,D_exogenous_full,F_hybrid_full,ridge,ridge,0.18369792569850144,0.16865624325564246,8.188270164545292,10,0.01729889982379973
+10,accepted_features_over_raw,A_exogenous_raw,D_exogenous_full,ridge,ridge,0.2625161848598303,0.20852945280473417,20.56510614152121,157,0.10786590026691556
+10,process_over_target_history,E_target_history,F_hybrid_full,ridge,ridge,0.23807547177066676,0.18204462308903768,23.534910280720748,178,0.18012019991874695
+10,target_history_over_exogenous,D_exogenous_full,F_hybrid_full,ridge,ridge,0.20852945280473417,0.18204462308903768,12.700762103134055,10,0.06331309978850186
+15,accepted_features_over_raw,A_exogenous_raw,D_exogenous_full,ridge,ridge,0.29106506261933895,0.26094112381228224,10.34955502249799,157,0.1249571000225842
+15,process_over_target_history,E_target_history,F_hybrid_full,ridge,ridge,0.2508022458060603,0.23732391581517825,5.374086642471512,178,0.2667934000492096
+15,target_history_over_exogenous,D_exogenous_full,F_hybrid_full,ridge,ridge,0.26094112381228224,0.23732391581517825,9.050780364575232,10,0.13448900007642806
