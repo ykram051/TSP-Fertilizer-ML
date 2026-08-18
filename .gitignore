@@ -1,0 +1,31 @@
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Jupyter transient state
+.ipynb_checkpoints/
+
+# LaTeX build intermediates (keep .tex and final .pdf files)
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+
+# Local render and QA output
+/tmp/
+
+# Local source data: do not publish plant data through Git
+/tsp_1min.csv
+
+# Reproducible table exceeding GitHub's regular per-file limit
+/reports/prediction_benchmark_artifacts/residuals_with_candidate_regimes.csv
+
+# OS/editor clutter
+.DS_Store
+Thumbs.db
+*~

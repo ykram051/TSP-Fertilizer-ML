@@ -1,0 +1,2 @@
+rule,candidate,strategy,mean_rmse,std_rmse,worst_rmse,mean_mae,mean_r2,mean_bias,mean_local_share
+"within 2% of best mean RMSE, then minimum worst-fold RMSE, RMSE SD, and mean RMSE",fixed_local_0.8,fixed_blend,0.32167879772844676,0.041192744817905476,0.3519644311069006,0.2500137760311778,0.3472352356712567,0.040812894189977154,0.8

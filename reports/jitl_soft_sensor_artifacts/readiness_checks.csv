@@ -1,0 +1,10 @@
+check,status
+target_and_target_history_absent,True
+four_forward_validation_blocks,True
+no_shuffle,True
+preprocessing_and_latent_spaces_fit_per_fold,True
+neighbours_restricted_to_fold_training,True
+test_not_used_for_candidate_selection,True
+retrospective_status_explicit,True
+model_bundle_exists,True
+all_exports_exist,True

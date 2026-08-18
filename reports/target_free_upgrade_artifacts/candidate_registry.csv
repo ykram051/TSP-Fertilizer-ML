@@ -1,0 +1,13 @@
+name,kind,params
+global_ridge,ridge,{'alpha': 10.0}
+global_ridge_strong,ridge,{'alpha': 100.0}
+recent_ridge_3d,recency_ridge,"{'alpha': 10.0, 'half_life_days': 3}"
+recent_ridge_7d,recency_ridge,"{'alpha': 10.0, 'half_life_days': 7}"
+recent_ridge_14d,recency_ridge,"{'alpha': 10.0, 'half_life_days': 14}"
+clustered_ridge_k3,clustered_ridge,"{'alpha': 10.0, 'n_clusters': 3}"
+clustered_ridge_k5,clustered_ridge,"{'alpha': 10.0, 'n_clusters': 5}"
+lightgbm_compact,lightgbm,"{'n_estimators': 150, 'num_leaves': 15, 'learning_rate': 0.05, 'min_child_samples': 40}"
+lightgbm_flexible,lightgbm,"{'n_estimators': 150, 'num_leaves': 31, 'learning_rate': 0.05, 'min_child_samples': 40}"
+blend_30ridge_70lgbm,blend,{'ridge_weight': 0.3}
+blend_50ridge_50lgbm,blend,{'ridge_weight': 0.5}
+blend_70ridge_30lgbm,blend,{'ridge_weight': 0.7}

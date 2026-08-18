@@ -1,0 +1,2 @@
+feature_set,feature_count,train_rows,valid_rows,test_rows
+D_full,178,30940,6628,6632
