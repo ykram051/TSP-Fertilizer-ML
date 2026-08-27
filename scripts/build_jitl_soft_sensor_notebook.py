@@ -76,6 +76,14 @@ for path in [OUTPUT_DIR, FIGURE_DIR, MODEL_DIR]:
 
 plt.style.use("seaborn-v0_8-whitegrid")
 pd.set_option("display.max_columns", 100)
+
+notebook06_selection = pd.read_csv(NOTEBOOK06_RESULTS / "selection.csv").iloc[0]
+notebook06_candidates = pd.read_csv(NOTEBOOK06_RESULTS / "candidate_summary.csv")
+assert notebook06_selection.candidate == "clustered_ridge_k5"
+accuracy_anchor = notebook06_candidates.query("kind == 'blend'").sort_values("mean_rmse").iloc[0]
+ACCURACY_ANCHOR_NAME = accuracy_anchor.candidate
+GLOBAL_RIDGE_WEIGHT = float(json.loads(accuracy_anchor.parameters)["ridge_weight"])
+GLOBAL_LGBM_WEIGHT = 1.0 - GLOBAL_RIDGE_WEIGHT
 """),
 md("### Observations"),
 md("The search is deliberately small: four latent spaces, three neighbourhood sizes, two weighting rules, and four global/local blend weights. This avoids an uncontrolled algorithm sweep."),
@@ -192,7 +200,7 @@ def fit_global_blend(train_imputed, eval_imputed, train_scaled, eval_scaled, y_t
     lgbm = LGBMRegressor(n_estimators=150, num_leaves=31, learning_rate=0.05,
                          min_child_samples=40, random_state=RANDOM_STATE,
                          n_jobs=-1, verbosity=-1).fit(train_imputed, y_train)
-    prediction = 0.5 * ridge.predict(eval_scaled) + 0.5 * lgbm.predict(eval_imputed)
+    prediction = GLOBAL_RIDGE_WEIGHT * ridge.predict(eval_scaled) + GLOBAL_LGBM_WEIGHT * lgbm.predict(eval_imputed)
     return {"ridge": ridge, "lgbm": lgbm}, prediction
 
 
@@ -356,9 +364,9 @@ test_metrics = regression_metrics(test["y"], selected_prediction)
 notebook06 = pd.read_csv(NOTEBOOK06_RESULTS / "retrospective_comparison.csv")
 prior06 = notebook06.query("candidate != 'Notebook05_frozen_blend'").iloc[0]
 notebook07 = pd.read_csv(NOTEBOOK07_RESULTS / "retrospective_comparison.csv")
-prior07 = notebook07.query("candidate != 'Notebook06_selected_blend'").iloc[0]
+prior07 = notebook07.query("candidate != 'Notebook06_selected_clustered_ridge_k5'").iloc[0]
 retrospective_comparison = pd.DataFrame([
-    {"candidate": "Notebook06_global_blend", "test_mae": prior06.test_mae, "test_rmse": prior06.test_rmse, "test_r2": prior06.test_r2},
+    {"candidate": "Notebook06_selected_clustered_ridge_k5", "test_mae": prior06.test_mae, "test_rmse": prior06.test_rmse, "test_r2": prior06.test_r2},
     {"candidate": "Notebook07_regime_hybrid", "test_mae": prior07.test_mae, "test_rmse": prior07.test_rmse, "test_r2": prior07.test_r2},
     {"candidate": selected_summary.candidate, "test_mae": test_metrics["mae"], "test_rmse": test_metrics["rmse"], "test_r2": test_metrics["r2"]},
 ])

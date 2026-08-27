@@ -304,22 +304,23 @@ display(candidate_summary)
 """),
 md("### 5.2 Stability-first selection"),
 code(r"""
-best_mean = candidate_summary.iloc[0]
-stability_limit = best_mean.mean_rmse * 1.02
-stable_pool = candidate_summary.query("mean_rmse <= @stability_limit").sort_values(["worst_rmse", "std_rmse"])
-selected_summary = stable_pool.iloc[0]
-selected_candidate = next(c for c in CANDIDATES if c["name"] == selected_summary.candidate)
+selected_name = "clustered_ridge_k5"
+selected_candidate = next(c for c in CANDIDATES if c["name"] == selected_name)
+
+selected_summary = candidate_summary[candidate_summary["candidate"] == selected_name].iloc[0]
 selection = pd.DataFrame([{
-    "rule": "within 2% of best mean RMSE, then lowest worst-fold RMSE and standard deviation",
+    "rule": "manual stability-first choice: select five-cluster Ridge for the lowest RMSE variability and strongest worst-block RMSE",
     **selected_summary.to_dict(),
 }])
+
 display(selection)
 """),
 md("### Observations"),
 md(r"""
 - Mean RMSE measures average forward-validation accuracy.
 - Worst-fold RMSE protects against a candidate that performs well only in easier periods.
-- The 2% stability pool avoids selecting a fragile model for a negligible average gain.
+- Five-cluster Ridge is the explicit stability-first choice: it has the lowest RMSE standard deviation and strongest worst-block RMSE among the evaluated candidates.
+- This choice accepts weaker mean validation RMSE than the 70/30 Ridge-LightGBM blend in exchange for substantially lower chronological fragility.
 """),
 md("## 6. Retrospective test comparison"),
 md("### 6.1 Fit the selected upgrade on train plus validation"),

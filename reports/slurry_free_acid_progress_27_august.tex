@@ -1,0 +1,410 @@
+\documentclass[11pt,aspectratio=169]{beamer}
+
+% ---------- Theme ----------
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title[SLURRY\_FREE\_ACID Progress]{SLURRY\_FREE\_ACID Modeling and Process Intelligence}
+\subtitle{Project Progress and Model Evaluation}
+\author{Ikram Benfellah}
+\institute{OCP Group — Internship Progress Update}
+\date{\today}
+
+\begin{document}
+
+% =====================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+\note{
+Quick framing before I start: this is a working update, not a defense. I want to walk through what I built, what I found, what worked, what didn't, and what I think we should do next.
+}
+
+% =====================================================================
+\begin{frame}{Current Project Status}
+\begin{itemize}
+    \item I built and evaluated three distinct modeling setups for SLURRY\_FREE\_ACID using one month of process data.
+    \item I compared each setup against simple baselines using chronological (time-respecting) validation.
+    \item I selected working candidates for two of the three use cases and rejected one additional upgrade after testing it.
+    \item I built an interactive dashboard that runs the saved models and shows prediction reliability information.
+    \item \textbf{Status:} internally validated on retrospective data. Not yet operationally validated on new, independent data.
+\end{itemize}
+\end{frame}
+\note{
+I want to be upfront from the start: everything I'll show is retrospective, meaning it's evaluated on data drawn from the same month I trained on, just held out chronologically. Nothing here has been tested on a truly new period yet. I'll come back to that at the end.
+}
+
+% =====================================================================
+\begin{frame}{Dataset and Evaluation Design}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Dataset}
+\begin{itemize}
+    \small
+    \item 44{,}640 chronological observations
+    \item $\approx$31 days, January 2026
+    \item One observation per minute
+    \item 21 original process measurements
+    \item Target: \texttt{SLURRY\_FREE\_ACID}
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Chronological split}
+\begin{itemize}
+    \small
+    \item $\approx$70\% train / 15\% validation / 15\% test
+    \item No random shuffling
+    \item All preprocessing (imputation, scaling, lag selection, filtering, clipping) fitted on training data only
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.3cm}
+\begin{alertblock}{Why chronological, not random}
+\small The 44,640 rows are \textbf{not} 44,640 independent experiments — they are one continuous month with strongly dependent adjacent minutes.
+\end{alertblock}
+\begin{block}{Feature preparation (brief)}
+\small I built four feature sets as the experimental foundation: A — Raw (21 features), B — Temporal (162 retained), C — Process-aware (58 retained), D — Full (178 retained). I won't detail the engineering here — it's covered in the notebooks.
+\end{block}
+\end{frame}
+\note{
+Two things to stress here: chronological splitting was a deliberate choice to avoid leaking near-identical minutes across train/test, and the one-month limitation is structural, not something I can fix by adding more rows from the same month. I'll only spend a few seconds on the four feature sets — happy to go deeper offline if useful.
+}
+
+% =====================================================================
+\begin{frame}{Three Operational Prediction Cases}
+This distinction matters for how any of these models could actually be used.
+\vspace{0.2cm}
+\begin{center}
+\small
+\begin{tabular}{L{2.4cm} L{3.1cm} L{2.6cm} L{2.4cm} L{2.6cm}}
+\toprule
+\textbf{Case} & \textbf{Required input} & \textbf{Predicts} & \textbf{Purpose} & \textbf{Main limitation} \\
+\midrule
+1. Direct forecast & Process measurements up to $t$ & $y(t+h)$ & Early warning, $h$=1/5/10/15 min & Must beat persistence to be useful \\
+\addlinespace
+2. Delta forecast & Process measurements $+$ current/past $y$ & $\Delta y(t,h)$, reconstructed as $y(t)+\Delta y$ & Short-horizon early warning & Needs $y(t)$ at inference \\
+\addlinespace
+3. Virtual sensor & Process measurements only & $y(t)$ (current, estimated) & Soft sensor when no lab/analyzer value exists & Estimates \emph{now}, not the future \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+\note{
+This slide is the key to avoid confusion later: Case 1 and 2 forecast the future and need different inputs; Case 3 estimates the current value and is a completely different use case — it's a virtual sensor, not an early-warning tool. I'll refer back to this table for the rest of the deck.
+}
+
+% =====================================================================
+\begin{frame}{Direct Forecasting and the Persistence Result}
+\textbf{Notebook 03 — all 16 combinations (4 horizons $\times$ 4 feature sets)}
+\begin{itemize}
+    \item Baselines: training-target mean, and persistence ($\hat{y}(t+h) = y(t)$) when $y(t)$ was available.
+    \item Models tested: Ridge, Extra Trees, Histogram Gradient Boosting.
+\end{itemize}
+\begin{block}{Result}
+The direct future-level models learned the general operating level of SLURRY\_FREE\_ACID, but did \textbf{not consistently outperform persistence}.
+\end{block}
+\begin{exampleblock}{Why}
+SLURRY\_FREE\_ACID changes relatively slowly over much of the month, so the current value $y(t)$ is already a very strong predictor at short horizons.
+\end{exampleblock}
+\textbf{Consequence:} this motivated predicting the \emph{change} instead of the full future level — the approach in Notebook 04.
+\end{frame}
+\note{
+This was a useful negative result, not a failure — it told me the problem wasn't "learn the future level from scratch," it was "learn how much it moves." That reframing is what Notebook 04 is built on.
+}
+
+% =====================================================================
+\begin{frame}{Target-Anchored Delta Forecasting (Notebook 04)}
+
+\begin{columns}[T]
+
+\begin{column}{0.55\textwidth}
+
+\textbf{Reformulation}
+
+\[
+\Delta y(t,h) = y(t+h) - y(t)
+\]
+
+\begin{itemize}
+    \small
+    \item Model learns only the movement.
+    \item Best candidate: \textbf{Ridge}, hybrid/full feature configuration
+    (process measurements + target history).
+\end{itemize}
+
+\end{column}
+
+\begin{column}{0.45\textwidth}
+
+\begin{exampleblock}{Example}
+\small
+
+current $y(t) = 11.20$ \\
+
+future $y(t+h) = 11.35$ \\
+
+model only needs to learn: $+0.15$
+
+\end{exampleblock}
+
+\end{column}
+
+\end{columns}
+
+\vspace{0.2cm}
+
+\begin{block}{Result}
+This model beat persistence at \textbf{all four horizons}, with an improvement
+of roughly \textbf{19.8\%--34.9\%} across horizons.
+\end{block}
+
+\begin{alertblock}{Limitation}
+\small
+Requires $y(t)$ at inference --- cannot be used on a period with no
+\texttt{SLURRY\_FREE\_ACID} measurement available at all.
+\end{alertblock}
+
+\end{frame}
+\note{
+The intuition worth repeating out loud: most of the future value is already contained in the current value, so asking the model to predict the small movement is a much easier and more accurate task than asking it to predict the whole level again. This is the strongest result so far, but it only works when we already have a current reading.
+}
+
+% =====================================================================
+\begin{frame}{Target-Free Virtual Sensor (Notebook 05)}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\textbf{Contract}
+\begin{itemize}
+    \small
+    \item Training: $X$ = process features, $y$ = current SLURRY\_FREE\_ACID (target excluded from inputs).
+    \item Inference: a new CSV with process measurements only can receive current free-acid estimates.
+    \item Models evaluated: Ridge, PLS, KNN, Extra Trees, HGB, XGBoost, LightGBM, and weighted blends.
+    \item Best: \textbf{50/50 Ridge + LightGBM blend} — Ridge for stable linear structure, LightGBM for nonlinear thresholds/interactions.
+\end{itemize}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{block}{Retrospective test performance}
+\small
+\begin{tabular}{ll}
+MAE & 0.2490 \\
+RMSE & 0.3014 \\
+R\textsuperscript{2} & 0.5583 \\
+\end{tabular}
+\vspace{0.15cm}
+\small $R^2 \approx 0.558$ means the model explained about 55.8\% of target variance relative to a constant-mean reference — \emph{not} ``55.8\% accuracy.''
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+\note{
+I want to be precise about R-squared here since it's easy to misread: it's variance explained relative to just predicting the mean, not an accuracy percentage. This is the baseline target-free model that everything in the next few slides tries to improve on.
+}
+
+% =====================================================================
+\begin{frame}{Expanding Validation and the Notebook 06 Upgrade}
+\textbf{Four expanding chronological validation blocks}, each $\approx$1,657 rows, training set growing each time (30{,}940 $\to$ 35{,}911 rows).
+\vspace{0.15cm}
+
+Candidates tested: stronger/global Ridge, recency-weighted Ridge (half-life 3/7/14 days), clustered Ridge experts (3 or 5 KMeans regions), LightGBM variants, Ridge–LightGBM blends.
+
+\vspace{0.1cm}
+\begin{center}
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+\textbf{Candidate} & \textbf{Mean RMSE} & \textbf{RMSE SD} & \textbf{Worst-block RMSE} \\
+\midrule
+70\% Ridge / 30\% LightGBM & 0.3191 & 0.0762 & 0.4236 \\
+50\% Ridge / 50\% LightGBM & 0.3201 & 0.0686 & 0.4124 \\
+\textbf{5-cluster Ridge (selected)} & 0.3280 & 0.0396 & 0.3522 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{block}{Selection and result}
+\small I selected \textbf{5-cluster Ridge} as the stability-first candidate: it has the lowest validation RMSE SD (0.0396) and best worst-block RMSE (0.3522). This accepts weaker mean RMSE than the 70/30 blend. After refitting on train+validation, retrospective test: MAE 0.2354, RMSE 0.2977 ($\approx$1.23\% below Notebook 05), R\textsuperscript{2} 0.5692. The clusters are statistical operating regions, not confirmed physical regimes.
+\end{block}
+\end{frame}
+\note{
+Worth flagging explicitly: this improvement wasn't a new model, it was better methodology — a sturdier expanding validation scheme and stability-aware selection. I think that distinction matters when we talk about where future gains will come from.
+}
+
+% =====================================================================
+\begin{frame}{Regime-Aware Hybrid: Accuracy vs. Stability (Notebook 07)}
+Notebook 06 selected 5-cluster Ridge for stability. Notebook 07 combines it with the best-mean \textbf{70/30 Ridge--LightGBM} accuracy anchor:
+\[
+\hat{y} = (1-w)\cdot \hat{y}_{\text{global}} + w \cdot \hat{y}_{\text{local}}
+\]
+\begin{center}
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+\textbf{Configuration} & \textbf{Mean RMSE} & \textbf{RMSE SD} & \textbf{Worst-block RMSE} \\
+\midrule
+Global only ($w{=}0$) & 0.3191 & 0.0762 & 0.4236 \\
+\textbf{80\% local (selected)} & 0.3213 & 0.0413 & 0.3548 \\
+Local only ($w{=}1$) & 0.3280 & 0.0396 & 0.3522 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{block}{Selected: 80\% local hybrid, vs. global}
+\small Against the 70/30 accuracy anchor, the selected hybrid accepts $\approx$0.69\% higher mean RMSE while reducing worst-block RMSE by $\approx$16.25\% and RMSE SD by $\approx$45.78\%. Retrospective test: MAE 0.2324, RMSE 0.2903, R\textsuperscript{2} 0.5902; RMSE is $\approx$2.47\% below Notebook 06's clustered model. \emph{This remains retrospective evidence.}
+\end{block}
+\end{frame}
+\note{
+This is a robustness-oriented alternative, not a strictly better model — it trades a small amount of average accuracy for meaningfully more consistent worst-case behavior across blocks. I'd frame the choice between Notebook 06 and 07 as "which failure mode do we care about more," not "which one is objectively better."
+}
+
+% =====================================================================
+\begin{frame}{JITL Experiment — and Why It Was Rejected (Notebook 08)}
+\textbf{Idea:} instead of 5 fixed clusters, find query-specific historical neighborhoods and fit a small local Ridge model per query, blended with the global model.
+\begin{itemize}
+    \small
+    \item Similarity spaces: PCA (10/20 comp.), PLS (5/10 comp.)
+    \item Neighbor counts: 100 / 250 / 500; weighting: uniform / inverse distance
+    \item Local contribution: 25\% / 50\% / 75\% / 100\%
+    \item 97 candidate configurations, evaluated across the same 4 validation blocks
+\end{itemize}
+\begin{center}
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+& \textbf{Mean RMSE} & \textbf{RMSE SD} & \textbf{Worst-block RMSE} \\
+\midrule
+Best JITL (PLS-10, 500 nb., uniform, 25\% local) & 0.3254 & 0.0799 & 0.4353 \\
+70/30 global accuracy anchor & 0.3191 & 0.0762 & 0.4236 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{alertblock}{Decision: rejected}
+\small Best JITL was $\approx$1.98\% worse on mean RMSE and $\approx$2.75\% worse on worst-block RMSE than the 70/30 global anchor, with higher variability and cost. Validation therefore retained the global anchor. Likely limits: similarity in measured variables may not imply the same free-acid relationship, and one month provides limited operating diversity.
+\end{alertblock}
+\end{frame}
+\note{
+I think this negative result is worth presenting on equal footing with the positive ones — I tested a genuinely more complex idea, and the chronological evidence didn't support it, so I didn't keep it just because it was more sophisticated.
+}
+
+% =====================================================================
+\begin{frame}{Final Modeling Decision}
+\begin{center}
+\scriptsize
+\begin{tabular}{L{2.6cm} L{3.4cm} L{4.2cm} L{1.8cm}}
+\toprule
+\textbf{Candidate} & \textbf{Role} & \textbf{Retrospective metrics} & \textbf{Status} \\
+\midrule
+Ridge delta model & Target-anchored forecasting & Beat persistence, all horizons, $\approx$19.8\%–34.9\% better & Selected \\
+\addlinespace
+5-cluster Ridge & Stability-first target-free & MAE 0.2354, RMSE 0.2977, $R^2$ 0.5692 & Selected \\
+\addlinespace
+80\% local regime hybrid & Balanced target-free alternative & MAE 0.2324, RMSE 0.2903, $R^2$ 0.5902 & Selected (alt.) \\
+\addlinespace
+JITL & Query-specific local model & Worse mean \& worst-block RMSE, higher variability & Rejected \\
+\addlinespace
+Operational model & Deployed / control-grade & — & \textbf{Not selected} — needs external validation on a later labeled month \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+\note{
+This is the slide I'd want to leave on the screen the longest if we discuss priorities — three candidates are in good shape for their respective use cases, one was correctly discarded, and none of them is ready to be called an operational model yet.
+}
+
+% =====================================================================
+\begin{frame}{Dashboard and Row-Level Reliability Outputs}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\textbf{Capabilities}
+\begin{itemize}
+    \small
+    \item Default January dataset or CSV upload
+    \item Process-variable exploration, correlations, relationship explorer
+    \item Candidate transition detection (top 5\% multivariate change score — analytical label, not confirmed plant events)
+    \item Target-free current-value prediction \& target-anchored forecasts (1/5/10/15 min)
+    \item Downloadable predictions, drift/familiarity info, report generation
+    \item Loads saved artifacts only — \textbf{does not retrain}; first 30 uploaded rows are warm-up (no prediction)
+\end{itemize}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{exampleblock}{Row-level confidence, on hover/focus}
+\small
+Predicted free acid: 11.42 \\
+90\% interval: 10.98–11.86 \\
+Process familiarity: low \\
+Confidence status: verification recommended
+\end{exampleblock}
+\begin{alertblock}{Caution}
+\small The 90\% interval is an empirical, within-month interval. Familiarity compares inputs to the training envelope — it is \emph{not} a probability of correctness, and low familiarity does not prove the prediction is wrong.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+\note{
+Two exports are available: a clean CSV with just the prediction columns, and a CSV with confidence that adds interval bounds, familiarity, confidence status, drift, and missing-feature share as separate columns — never mixed into the numeric prediction column, so it stays usable in Excel, pandas, or downstream reporting.
+}
+
+% =====================================================================
+\begin{frame}{Limitations, Open Questions, and Next Steps}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Main limitations}
+\begin{itemize}
+    \tiny
+    \item Only one month of labeled data; adjacent minutes are dependent
+    \item No independent seasonal/product-grade validation
+    \item January test period has already been inspected
+    \item Uncertain engineering units for several variables (acid flows, ground-phosphate, fuel, steam, wash-liquid, recycling)
+    \item Process-aware ratios remain provisional; KMeans clusters are not confirmed physical regimes
+    \item No causal interpretation from model importance; no control recommendation without confirmed controllable variables
+    \item Empirical intervals not yet externally calibrated
+    \item Target-free accuracy cannot be measured on a new CSV without some real reference values
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Next steps}
+\begin{enumerate}
+    \tiny
+    \item Obtain a later labeled month (process vars + measured free acid, ideally + grade/event info)
+    \item Freeze current candidates before inspecting it
+    \item Evaluate without retuning: MAE, RMSE, $R^2$, bias, transition/extreme-value errors, missing-sensor behavior, drift, interval coverage
+    \item Compare the three selected candidates on that data
+    \item Calibrate uncertainty intervals on genuinely later data
+    \item Get process engineers to validate units, proxies, controllable variables, regimes, event windows
+    \item Only then select an operational prototype
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+\note{
+I'd rather spend the remaining time here than on more modeling right now — the honest next step is validation data and process-engineering input, not another algorithm. I'm not proposing an LSTM, Transformer, or other larger model as the next step.
+}
+
+% =====================================================================
+\begin{frame}{Conclusion}
+\begin{itemize}
+    \item Predicting the future \emph{change} beats persistence when the current target is available.
+    \item Process-only current-value estimation (virtual sensing) is feasible within this month's data.
+    \item Five-cluster Ridge is the stability-first target-free choice; the 80\% local hybrid gives the strongest retrospective balance of accuracy and stability.
+    \item Just-in-time learning did not justify its added complexity and was rejected.
+    \item The dashboard provides process exploration, two prediction modes, row-level reliability context, and analysis-ready exports.
+    \item \textbf{The project is ready for external shadow testing, not operational control.}
+    \item Next requirement: a genuinely later labeled month, plus process-engineer validation.
+\end{itemize}
+\end{frame}
+\note{
+That's where I'd like to land: solid, well-validated retrospective results on two use cases, one honest rejection, and a clear, specific ask for what I need next to move toward something operational.
+}
+
+\end{document}

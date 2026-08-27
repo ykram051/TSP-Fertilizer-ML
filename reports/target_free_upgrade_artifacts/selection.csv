@@ -1,2 +1,2 @@
 rule,candidate,kind,parameters,mean_rmse,std_rmse,worst_rmse,mean_mae,mean_r2,total_seconds
-"within 2% of best mean RMSE, then lowest worst-fold RMSE and standard deviation",blend_50ridge_50lgbm,blend,"{""ridge_weight"": 0.5}",0.32006301557918015,0.06856141563172226,0.4124426038146149,0.25464627822074526,0.3717981387985807,13.223677000030875
+manual stability-first choice: select five-cluster Ridge for the lowest RMSE variability and strongest worst-block RMSE,clustered_ridge_k5,clustered_ridge,"{""alpha"": 10.0, ""n_clusters"": 5}",0.3279826288912699,0.039565341047475,0.3521914948933338,0.2540352066972698,0.3144629533028342,16.908876098692417

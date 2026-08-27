@@ -17,7 +17,7 @@ cells = [
 md(r"""
 # Regime-Aware Target-Free Hybrid Soft Sensor
 
-This notebook follows the executed evidence from Notebook 06. The global 50/50 Ridge-LightGBM blend had the best accuracy/stability compromise, while five clustered Ridge experts had a slightly weaker mean RMSE but a much better worst validation block.
+This notebook follows the executed evidence from Notebook 06. Five-cluster Ridge was selected as the stability-first model because it had the lowest RMSE variability and strongest worst validation block. The 70/30 Ridge-LightGBM blend remains the accuracy anchor because it had the best mean validation RMSE.
 
 The controlled hypothesis is therefore:
 
@@ -58,6 +58,16 @@ for path in [OUTPUT_DIR, FIGURE_DIR, MODEL_DIR]:
     path.mkdir(parents=True, exist_ok=True)
 plt.style.use("seaborn-v0_8-whitegrid")
 pd.set_option("display.max_columns", 100)
+
+notebook06_selection = pd.read_csv(NOTEBOOK06_RESULTS / "selection.csv").iloc[0]
+notebook06_candidates = pd.read_csv(NOTEBOOK06_RESULTS / "candidate_summary.csv")
+selected06_params = json.loads(notebook06_selection.parameters)
+assert notebook06_selection.candidate == "clustered_ridge_k5"
+LOCAL_N_CLUSTERS = int(selected06_params["n_clusters"])
+accuracy_anchor = notebook06_candidates.query("kind == 'blend'").sort_values("mean_rmse").iloc[0]
+ACCURACY_ANCHOR_NAME = accuracy_anchor.candidate
+GLOBAL_RIDGE_WEIGHT = float(json.loads(accuracy_anchor.parameters)["ridge_weight"])
+GLOBAL_LGBM_WEIGHT = 1.0 - GLOBAL_RIDGE_WEIGHT
 """),
 md("### Observations"),
 md("The random seed, feature set, split source, and validation-block count are fixed centrally. No test result enters candidate selection."),
@@ -160,13 +170,13 @@ def fit_components(X_train, y_train, X_eval):
     lgbm = LGBMRegressor(n_estimators=150, num_leaves=31, learning_rate=0.05,
                          min_child_samples=40, random_state=RANDOM_STATE,
                          n_jobs=-1, verbosity=-1).fit(Xt, y_train)
-    global_prediction = 0.5 * ridge.predict(Xes) + 0.5 * lgbm.predict(Xe)
+    global_prediction = GLOBAL_RIDGE_WEIGHT * ridge.predict(Xes) + GLOBAL_LGBM_WEIGHT * lgbm.predict(Xe)
 
-    clusterer = KMeans(n_clusters=5, random_state=RANDOM_STATE, n_init=10)
+    clusterer = KMeans(n_clusters=LOCAL_N_CLUSTERS, random_state=RANDOM_STATE, n_init=10)
     labels = clusterer.fit_predict(Xts)
     global_ridge = Ridge(alpha=10.0).fit(Xts, y_train)
     experts, cluster_sizes = {}, {}
-    for cluster in range(5):
+    for cluster in range(LOCAL_N_CLUSTERS):
         mask = labels == cluster
         cluster_sizes[cluster] = int(mask.sum())
         experts[cluster] = Ridge(alpha=10.0).fit(Xts[mask], np.asarray(y_train)[mask]) if mask.sum() >= 100 else global_ridge
@@ -185,8 +195,8 @@ def fit_components(X_train, y_train, X_eval):
 """),
 md("### Model meaning"),
 md(r"""
-- The **global component** is the Notebook 06 50/50 Ridge-LightGBM blend.
-- The **local component** assigns each row to one of five KMeans operating regions and uses the corresponding Ridge expert.
+- The **accuracy anchor** is the best-mean Ridge-LightGBM blend from Notebook 06; its weights are loaded from the exported candidate table (currently 70% Ridge / 30% LightGBM).
+- The **stability anchor** is Notebook 06's selected five-cluster Ridge model. Each row is assigned to a statistical KMeans region and evaluated by its Ridge expert.
 - Distance to the assigned centroid is a familiarity score in standardized feature space. It is not a verified plant regime label.
 """),
 md("## 5. Validation-only hybrid search"),
@@ -264,7 +274,7 @@ test_metrics = metrics(test["y"], test_prediction)
 notebook06 = pd.read_csv(NOTEBOOK06_RESULTS / "retrospective_comparison.csv")
 prior = notebook06.query("candidate != 'Notebook05_frozen_blend'").iloc[0]
 retrospective_comparison = pd.DataFrame([
-    {"candidate": "Notebook06_selected_blend", "test_mae": prior.test_mae, "test_rmse": prior.test_rmse, "test_r2": prior.test_r2},
+    {"candidate": "Notebook06_selected_clustered_ridge_k5", "test_mae": prior.test_mae, "test_rmse": prior.test_rmse, "test_r2": prior.test_r2},
     {"candidate": name, "test_mae": test_metrics["mae"], "test_rmse": test_metrics["rmse"], "test_r2": test_metrics["r2"]},
 ])
 retrospective_comparison["rmse_improvement_vs_notebook06_pct"] = 100 * (float(prior.test_rmse) - retrospective_comparison.test_rmse) / float(prior.test_rmse)

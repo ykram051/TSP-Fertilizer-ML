@@ -149,6 +149,39 @@ def build_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return work.iloc[warmup:].reset_index(drop=True), all_features.iloc[warmup:][feature_names].reset_index(drop=True)
 
 
+def reliability_metadata(
+    drift: np.ndarray,
+    drift_threshold: float,
+    missing_feature_share: pd.Series,
+) -> pd.DataFrame:
+    """Create transparent row-level reliability descriptors.
+
+    Familiarity is a heuristic comparison with the saved training-envelope
+    threshold. It is not a probability that the prediction is correct.
+    """
+    drift = np.asarray(drift, dtype=float)
+    ratio = drift / max(float(drift_threshold), EPSILON)
+    missing = np.asarray(missing_feature_share, dtype=float)
+    familiarity = np.select(
+        [ratio <= 0.75, ratio <= 1.0],
+        ["high", "moderate"],
+        default="low",
+    )
+    verification = (ratio > 1.0) | (missing > 0.10)
+    caution = (~verification) & ((ratio > 0.75) | (missing > 0.02))
+    confidence = np.select(
+        [verification, caution],
+        ["verification recommended", "use with caution"],
+        default="standard model conditions",
+    )
+    return pd.DataFrame({
+        "process_familiarity": familiarity,
+        "confidence_status": confidence,
+        "missing_feature_share": missing,
+        "drift_to_threshold_ratio": ratio,
+    })
+
+
 def predict_virtual(df: pd.DataFrame) -> pd.DataFrame:
     r = resources(); bundle = r["virtual"]
     aligned, features = build_features(df)
@@ -166,10 +199,13 @@ def predict_virtual(df: pd.DataFrame) -> pd.DataFrame:
     if standard is None:
         standard = pd.DataFrame(bundle["notebook02_pipelines_by_set"]["D_full"]["standard"].transform(features), columns=features.columns)
     drift = np.sqrt(np.mean(np.square(standard.to_numpy()), axis=1))
+    drift_threshold = float(bundle["drift_threshold_99pct"])
+    reliability = reliability_metadata(drift, drift_threshold, features.isna().mean(axis=1))
     half = float(bundle["interval_half_width_90"])
     out = pd.DataFrame({TIME_COL: aligned[TIME_COL], "predicted_slurry_free_acid": prediction,
                         "lower_90": prediction - half, "upper_90": prediction + half,
-                        "drift_score": drift, "outside_training_envelope": drift > float(bundle["drift_threshold_99pct"])})
+                        "drift_score": drift, "outside_training_envelope": drift > drift_threshold})
+    out = pd.concat([out, reliability], axis=1)
     if TARGET in aligned:
         out["actual_slurry_free_acid"] = aligned[TARGET]
         out["absolute_error"] = (out["predicted_slurry_free_acid"] - out["actual_slurry_free_acid"]).abs()
@@ -203,9 +239,14 @@ def predict_early_warning(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
         int(r["virtual"]["maximum_lookback"]):
     ].reset_index(drop=True)
     predicted_future = current + delta
+    drift = np.sqrt(np.mean(np.square(process_scaled.to_numpy()), axis=1))
+    drift_threshold = float(r["virtual"]["drift_threshold_99pct"])
+    reliability = reliability_metadata(drift, drift_threshold, features.isna().mean(axis=1))
     out = pd.DataFrame({TIME_COL: aligned[TIME_COL], "current_slurry_free_acid": current,
                         "predicted_change": delta, f"predicted_{horizon}min": predicted_future,
-                        f"actual_{horizon}min": actual_future})
+                        f"actual_{horizon}min": actual_future, "drift_score": drift,
+                        "outside_training_envelope": drift > drift_threshold})
+    out = pd.concat([out, reliability], axis=1)
     out["absolute_error"] = (out[f"predicted_{horizon}min"] - out[f"actual_{horizon}min"]).abs()
     return out[current.notna()].reset_index(drop=True)
 
@@ -382,10 +423,24 @@ async def predict(mode: str, file: UploadFile = File(...), horizon: int = 10):
 
 
 @app.get("/api/download/{result_id}")
-def download(result_id: str):
+def download(result_id: str, format: str = "clean"):
     if result_id not in RESULT_CACHE: raise HTTPException(404, "Prediction result not found in this session.")
-    return Response(RESULT_CACHE[result_id].to_csv(index=False), media_type="text/csv",
-                    headers={"Content-Disposition": f'attachment; filename="predictions_{result_id}.csv"'})
+    result = RESULT_CACHE[result_id]
+    if format == "clean":
+        predicted = [c for c in result.columns if c.startswith("predicted_")]
+        core = [TIME_COL]
+        if "current_slurry_free_acid" in result.columns:
+            core.append("current_slurry_free_acid")
+        core.extend(predicted)
+        download_frame = result[list(dict.fromkeys(core))]
+        suffix = "clean"
+    elif format == "confidence":
+        download_frame = result
+        suffix = "with_confidence"
+    else:
+        raise HTTPException(400, "Download format must be 'clean' or 'confidence'.")
+    return Response(download_frame.to_csv(index=False), media_type="text/csv",
+                    headers={"Content-Disposition": f'attachment; filename="predictions_{suffix}_{result_id}.csv"'})
 
 
 if __name__ == "__main__":
