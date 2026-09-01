@@ -6,6 +6,14 @@ This project aims to analyze industrial production data from the Triple Super Ph
 
 > **Note:** This project is part of an engineering internship. All proprietary production data remains confidential and is not included in this repository.
 
+## Industrial deployment prototype
+
+The advisory-only Docker and OPC UA laboratory package is documented in
+[`deployment/README.md`](deployment/README.md). It separates the physical/DCS
+architecture, Kepware and OPC UA, Docker packaging, CSV replay, read-only shadow
+mode, advisory HMI outputs, unresolved plant questions, tag mapping, simulator
+code and inference-service code.
+
 ---
 
 ## Objectives

@@ -1,2 +1,2 @@
 rule,candidate,space,components,neighbours,weighting,local_weight,mean_rmse,std_rmse,worst_rmse,mean_mae,mean_r2,mean_bias,total_seconds
-"within 2% of best mean RMSE, then minimum worst-fold RMSE, RMSE SD, mean RMSE, and runtime",global_blend,global,0,0,none,0.0,0.31905604323874126,0.0761867990240099,0.42360383881876607,0.25314692788267446,0.3799197916470378,0.06301719136223369,21.811380300670862
+"within 2% of best mean RMSE, then minimum worst-fold RMSE, RMSE SD, mean RMSE, and runtime",global_blend,global,0,0,none,0.0,0.31905604323874126,0.0761867990240099,0.42360383881876607,0.25314692788267446,0.3799197916470378,0.06301719136223369,13.16663819923997

@@ -33,19 +33,6 @@
 Quick framing before I start: this is a working update, not a defense. I want to walk through what I built, what I found, what worked, what didn't, and what I think we should do next.
 }
 
-% =====================================================================
-\begin{frame}{Current Project Status}
-\begin{itemize}
-    \item I built and evaluated three distinct modeling setups for SLURRY\_FREE\_ACID using one month of process data.
-    \item I compared each setup against simple baselines using chronological (time-respecting) validation.
-    \item I selected working candidates for two of the three use cases and rejected one additional upgrade after testing it.
-    \item I built an interactive dashboard that runs the saved models and shows prediction reliability information.
-    \item \textbf{Status:} internally validated on retrospective data. Not yet operationally validated on new, independent data.
-\end{itemize}
-\end{frame}
-\note{
-I want to be upfront from the start: everything I'll show is retrospective, meaning it's evaluated on data drawn from the same month I trained on, just held out chronologically. Nothing here has been tested on a truly new period yet. I'll come back to that at the end.
-}
 
 % =====================================================================
 \begin{frame}{Dataset and Evaluation Design}

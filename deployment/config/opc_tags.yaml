@@ -1,0 +1,164 @@
+namespace_uri: urn:ocp:tsp:slurry-free-acid:simulation
+
+system:
+  sequence:
+    node_id: ns=2;s=TSP.System.Sequence
+  source_timestamp:
+    node_id: ns=2;s=TSP.System.SourceTimestamp
+
+inputs:
+  PRODUCTION_TSP_BALANCE:
+    node_id: ns=2;s=TSP.Input.PRODUCTION_TSP_BALANCE
+    required: true
+    engineering_unit: unknown
+    minimum: null
+    maximum: null
+  FLOW_RATE_PHOSPHORIC_ACID_1:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_PHOSPHORIC_ACID_1
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_PHOSPHORIC_ACID_2:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_PHOSPHORIC_ACID_2
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_GROUND_PHOSPHATE:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_GROUND_PHOSPHATE
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_SLURRY_T_PER_HR:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_SLURRY_T_PER_HR
+    required: true
+    engineering_unit: t/h
+    minimum: null
+    maximum: null
+  FLOW_RATE_SLURRY_M3_HR:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_SLURRY_M3_HR
+    required: true
+    engineering_unit: m3/h
+    minimum: null
+    maximum: null
+  RECYCLAGE:
+    node_id: ns=2;s=TSP.Input.RECYCLAGE
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  PRESSURE_VAPEUR:
+    node_id: ns=2;s=TSP.Input.PRESSURE_VAPEUR
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_VAPEUR:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_VAPEUR
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_CUVE_ATTAQUE:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_CUVE_ATTAQUE
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_CUVE_DE_PASSAGE:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_CUVE_DE_PASSAGE
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_SLURRY_PULVERISATEUR:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_SLURRY_PULVERISATEUR
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  DEPRESSURE_SECHEUR:
+    node_id: ns=2;s=TSP.Input.DEPRESSURE_SECHEUR
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  LEVEL_CUVE_PASSAGE:
+    node_id: ns=2;s=TSP.Input.LEVEL_CUVE_PASSAGE
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_GAZ_SORTIE_SECHEUR:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_GAZ_SORTIE_SECHEUR
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_FIOUL:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_FIOUL
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  TEMPERATURE_AIR_CHAUD:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_AIR_CHAUD
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_LIQUIDE_LAVAGE:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_LIQUIDE_LAVAGE
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_VAPEUR:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_VAPEUR
+    required: true
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  FLOW_RATE_SLURRY_M3_HR_2:
+    node_id: ns=2;s=TSP.Input.FLOW_RATE_SLURRY_M3_HR_2
+    required: true
+    engineering_unit: m3/h
+    minimum: null
+    maximum: null
+  TEMPERATURE_BRIQUE:
+    node_id: ns=2;s=TSP.Input.TEMPERATURE_BRIQUE
+    required: true
+    engineering_unit: degC_pending_confirmation
+    minimum: null
+    maximum: null
+  SLURRY_FREE_ACID:
+    node_id: ns=2;s=TSP.Input.SLURRY_FREE_ACID
+    required: false
+    source_type: manual_laboratory
+    engineering_unit: pending_confirmation
+    minimum: null
+    maximum: null
+  SLURRY_FREE_ACID_LAB_TIMESTAMP:
+    node_id: ns=2;s=TSP.Input.SLURRY_FREE_ACID_LAB_TIMESTAMP
+    required: false
+    source_type: manual_laboratory_timestamp
+
+advisory_outputs:
+  prediction:
+    node_id: ns=2;s=TSP.ML_Advisory.PredictedFreeAcid
+  predicted_change:
+    node_id: ns=2;s=TSP.ML_Advisory.PredictedChange
+  generated_at:
+    node_id: ns=2;s=TSP.ML_Advisory.GeneratedAt
+  prediction_for:
+    node_id: ns=2;s=TSP.ML_Advisory.PredictionFor
+  model_status:
+    node_id: ns=2;s=TSP.ML_Advisory.ModelStatus
+  process_familiarity:
+    node_id: ns=2;s=TSP.ML_Advisory.ProcessFamiliarity
+  input_quality:
+    node_id: ns=2;s=TSP.ML_Advisory.InputQuality
+  model_version:
+    node_id: ns=2;s=TSP.ML_Advisory.ModelVersion

@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY deployment/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN python -c "import lightgbm; print('LightGBM native runtime available')"
+
+COPY deployment/industrial_inference /app/industrial_inference
+
+HEALTHCHECK --interval=20s --timeout=5s --start-period=45s --retries=3 \
+  CMD ["python", "-m", "industrial_inference.healthcheck"]
+
+CMD ["python", "-m", "industrial_inference.service"]
