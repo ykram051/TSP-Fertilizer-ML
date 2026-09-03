@@ -8,6 +8,7 @@ def configuration():
         "quality": {
             "reject_bad_or_uncertain": True,
             "reject_impossible_values": True,
+            "maximum_missing_required_share": 0.5,
         },
         "manual_laboratory_target": {
             "variable": "SLURRY_FREE_ACID",
@@ -32,6 +33,41 @@ def test_bad_quality_is_rejected():
     decision = shield.evaluate({"FLOW": 10}, {"FLOW": False})
     assert not decision.accepted
     assert "bad_or_uncertain_quality" in decision.reasons[0]
+
+
+def test_isolated_missing_value_is_accepted_for_train_fitted_imputation():
+    tags = {
+        "inputs": {
+            "FLOW_A": {"required": True},
+            "FLOW_B": {"required": True},
+        }
+    }
+    shield = DataQualityShield(configuration(), tags)
+    decision = shield.evaluate(
+        {"FLOW_A": 10, "FLOW_B": float("nan")},
+        {"FLOW_A": True, "FLOW_B": True},
+    )
+    assert decision.accepted
+    assert decision.status == "IMPUTED"
+    assert decision.warnings == ("imputed_inputs:FLOW_B",)
+
+
+def test_excessive_simultaneous_missingness_is_rejected():
+    config = configuration()
+    config["quality"]["maximum_missing_required_share"] = 0.25
+    tags = {
+        "inputs": {
+            "FLOW_A": {"required": True},
+            "FLOW_B": {"required": True},
+        }
+    }
+    shield = DataQualityShield(config, tags)
+    decision = shield.evaluate(
+        {"FLOW_A": float("nan"), "FLOW_B": 20},
+        {"FLOW_A": True, "FLOW_B": True},
+    )
+    assert not decision.accepted
+    assert "excessive_missing_inputs" in decision.reasons[0]
 
 
 def test_stale_manual_laboratory_result_is_rejected():

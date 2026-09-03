@@ -22,6 +22,10 @@ One historical minute is replayed every configured number of seconds. The CSV
 timestamp remains the source timestamp, so the service can distinguish process
 time from wall-clock replay time.
 
+The laboratory default is one historical minute per wall-clock second. This is
+60 times faster than the plant cadence while leaving enough time for one full
+OPC snapshot, feature calculation and prediction on Docker Desktop.
+
 ## Warm-up
 
 The feature pipeline needs 30 historical rows. The service reports

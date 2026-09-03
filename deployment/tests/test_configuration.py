@@ -24,3 +24,5 @@ def test_plant_writes_are_disabled_by_default():
     root = Path(__file__).resolve().parents[2]
     config = yaml.safe_load((root / "deployment/config/service.yaml").read_text(encoding="utf-8"))
     assert config["outputs"]["advisory_write_enabled"] is False
+    assert config["outputs"]["sqlite_database"] == "/runtime/predictions.sqlite3"
+    assert config["outputs"]["sqlite_schema"] == "/database/schema.sql"

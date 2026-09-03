@@ -156,8 +156,6 @@ advisory_outputs:
     node_id: ns=2;s=TSP.ML_Advisory.PredictionFor
   model_status:
     node_id: ns=2;s=TSP.ML_Advisory.ModelStatus
-  process_familiarity:
-    node_id: ns=2;s=TSP.ML_Advisory.ProcessFamiliarity
   input_quality:
     node_id: ns=2;s=TSP.ML_Advisory.InputQuality
   model_version:

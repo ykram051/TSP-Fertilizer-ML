@@ -26,10 +26,15 @@ quality:
   reject_bad_or_uncertain: true
   reject_non_monotonic_timestamps: true
   reject_impossible_values: true
-  maximum_missing_required_share: 0.0
+  # The trained pipeline imputes isolated missing cells and includes missingness
+  # indicators. Reject only when more than 25% of required process inputs are
+  # absent in the same minute.
+  maximum_missing_required_share: 0.25
 
 outputs:
   advisory_write_enabled: false
+  sqlite_database: /runtime/predictions.sqlite3
+  sqlite_schema: /database/schema.sql
   jsonl_predictions: /runtime/predictions.jsonl
   latest_prediction_file: /runtime/latest_prediction.json
   health_file: /runtime/health.json
@@ -37,6 +42,6 @@ outputs:
 
 simulator:
   csv_path: /data/tsp_1min.csv
-  replay_interval_seconds: 0.50
+  replay_interval_seconds: 1.00
   loop: false
   laboratory_update_every_rows: 60

@@ -16,7 +16,8 @@ used to change plant control.
 
 The service refuses or delays prediction when it detects:
 
-- missing required tags;
+- excessive simultaneous missingness (isolated missing values use the
+  train-fitted imputer and missingness indicators);
 - bad or uncertain OPC quality;
 - duplicate or non-monotonic timestamps;
 - gaps larger than the configured cadence tolerance;

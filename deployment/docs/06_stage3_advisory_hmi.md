@@ -12,7 +12,6 @@ Recommended fields:
 | `GeneratedAt` | Time inference ran |
 | `PredictionFor` | Future timestamp represented by the forecast |
 | `ModelStatus` | `WARMING_UP`, `RUNNING`, `DATA_ERROR`, `DISCONNECTED` |
-| `ProcessFamiliarity` | Training-envelope heuristic |
 | `InputQuality` | Aggregate quality decision |
 | `ModelVersion` | Exact deployed artifact/image version |
 

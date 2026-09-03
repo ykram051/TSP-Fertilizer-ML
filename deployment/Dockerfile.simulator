@@ -1,10 +1,16 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.7
+FROM python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=10 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 
 COPY deployment/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir asyncua==1.1.8 pandas==2.2.3 PyYAML==6.0.1
+RUN --mount=type=cache,id=tsp-pip-cache,target=/root/.cache/pip \
+    pip install --prefer-binary asyncua==1.1.8 numpy==1.26.4 pandas==2.2.3 PyYAML==6.0.1
 
 COPY deployment/simulator /app/simulator
 COPY deployment/industrial_inference/configuration.py /app/industrial_inference/configuration.py

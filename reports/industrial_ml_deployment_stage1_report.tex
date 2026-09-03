@@ -92,7 +92,7 @@ Inference service & A second Python container subscribes to a commit-sequence ta
 Docker Compose & Creates both containers on a private Docker network; the simulator exposes port 4840. & Reproducible and isolated Stage~1 environment on Windows/Docker Desktop. \\
 Tag mapping & \code{config/opc_tags.yaml} maps research variable names to OPC Node IDs, units and required-tag metadata. & Avoid hard-coded plant addresses; real Node IDs can be substituted later. \\
 Service policy & \code{config/service.yaml} centralizes mode, cadence, buffer, quality and output settings. & Keep operational choices visible and auditable. \\
-Data-quality shield & Rejects missing required tags, bad/uncertain OPC quality, invalid chronology, excessive gaps and configured impossible values. & Prevent inference from unreliable inputs. \\
+Data-quality shield & Allows isolated missing cells through the trained imputation pipeline, but rejects excessive missingness, bad/uncertain OPC quality, invalid chronology, excessive gaps and configured impossible values. & Continue safely through ordinary missing cells without hiding serious data loss. \\
 Runtime outputs & Health status, complete JSONL prediction history and one readable latest-prediction JSON file. & Monitoring, audit and simple human inspection. \\
 PowerShell scripts & Start, stop and readable status commands. & Make the laboratory prototype easy to operate. \\
 \bottomrule
@@ -124,7 +124,7 @@ PowerShell scripts & Start, stop and readable status commands. & Make the labora
 \[
 \text{minimum rows}=30+1=31.
 \]
-The service reports \code{WARMING_UP} rather than inventing unavailable history. Genuine missing required measurements can interrupt continuity and restart warm-up. In production, a 31-minute restart delay should be avoided by backfilling the last 30 minutes from the plant historian and, if approved, restoring a validated persistent local buffer. A separately trained raw-only fallback model is another option, but it would require its own validation.
+The service reports \code{WARMING_UP} while this initial history is collected. An isolated missing cell does not restart the buffer: Notebook~02's train-fitted imputer and missingness indicators handle it, and the output reports \code{IMPUTED}. A real timestamp gap, reconnect, bad OPC quality or more than 25\% of required inputs missing together still blocks inference. In production, the initial delay should be avoided by backfilling the last 30 minutes from the plant historian and, if approved, restoring a validated persistent local buffer.
 
 \begin{tabularx}{\textwidth}{@{}L{3.4cm}Y@{}}
 \toprule
@@ -149,13 +149,13 @@ Docker Hub TLS timeout & Temporary registry/network timeout while downloading th
 PowerShell Compose call failed & Docker arguments were not forwarded as an array. & Corrected the wrapper to pass all arguments and check exit codes. \\
 LightGBM could not load & Linux image lacked the OpenMP runtime. & Installed \code{libgomp1} and added a build-time import check. \\
 Client initially read the last replayed row & The simulator continued while the inference container had previously failed. & Restarted the complete laboratory environment from a clean replay state. \\
-Duplicate/non-monotonic timestamps & Replay at 0.10 s was faster than the OPC publication/reading cycle. & Changed replay to 0.50 s, subscription to 100 ms, added coherent sequence-guarded reads and ignored already processed sequence values. \\
+Duplicate/non-monotonic timestamps & Replay at 0.10 s was faster than the OPC publication/reading cycle. & Changed replay to 1.00 s, subscription to 100 ms, added coherent sequence-guarded reads and ignored already processed sequence values. \\
 Prediction file absent during warm-up & It was created only after the first prediction. & Create the history file at startup and expose a separate readable latest-prediction file. \\
 Unreadable protocol logs & OPC library INFO messages included full protocol packets. & Reduced library logging and added a concise status script. \\
 \bottomrule
 \end{tabularx}
 
-\textbf{Current interpretation of DATA\_ERROR.} A message reporting a missing required tag, for example \code{FLOW_RATE_GROUND_PHOSPHATE}, is a data-quality decision, not a container failure. The model refuses that instant because a required measurement is absent. The latest successful prediction may remain available while the current service status returns to warm-up.
+\textbf{Current interpretation of quality status.} \code{GOOD} means no input required imputation. \code{IMPUTED} means prediction continued and lists the missing sensors handled by the trained pipeline. \code{DATA_ERROR} is reserved for a serious input problem such as excessive simultaneous missingness, bad OPC quality or invalid chronology; it is not necessarily a container failure.
 
 \section{Current limits and next steps}
 

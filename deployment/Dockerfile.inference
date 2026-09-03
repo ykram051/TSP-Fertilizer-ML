@@ -1,6 +1,11 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.7
+FROM python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=10 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 
 RUN apt-get update \
@@ -8,10 +13,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY deployment/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN --mount=type=cache,id=tsp-pip-cache,target=/root/.cache/pip \
+    pip install --prefer-binary -r /app/requirements.txt
 RUN python -c "import lightgbm; print('LightGBM native runtime available')"
 
 COPY deployment/industrial_inference /app/industrial_inference
+COPY deployment/database /database
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=45s --retries=3 \
   CMD ["python", "-m", "industrial_inference.healthcheck"]

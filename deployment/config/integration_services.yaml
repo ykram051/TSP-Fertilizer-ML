@@ -1,0 +1,73 @@
+architecture_version: 1.0.0
+deployment_stage: csv_replay_laboratory
+
+services:
+  physical_measurement:
+    runtime: plant_field
+    component: sensors_and_manual_laboratory
+    responsibility: measure process variables and SLURRY_FREE_ACID samples
+    interface: analog_or_digital_io
+    production_owner: plant_instrumentation
+
+  process_control:
+    runtime: plant_ot
+    component: plc_and_dcs
+    responsibility: deterministic control, alarms, interlocks, and safety
+    interface: vendor_industrial_protocol
+    production_owner: control_system_team
+    ml_dependency: none
+
+  protocol_gateway:
+    runtime: approved_windows_ot_host
+    component: kepserverex
+    responsibility: expose mapped plant tags through OPC UA
+    interface: opc_ua
+    current_stage_substitute: opc-simulator
+    production_owner: it_ot_team
+
+  opc_simulator:
+    runtime: docker_container
+    compose_service: opc-simulator
+    responsibility: replay tsp_1min.csv as timestamped OPC UA tags
+    interface: opc.tcp_port_4840
+    stage: laboratory_only
+
+  inference:
+    runtime: docker_container
+    compose_service: inference-service
+    responsibility: subscribe, validate, buffer, build features, preprocess, and predict
+    interface: opc_ua_client
+    control_write_permission: false
+
+  persistence:
+    runtime: embedded_in_inference_service
+    component: sqlite
+    responsibility: store runs, predictions, and status transitions
+    database_file: /runtime/predictions.sqlite3
+    interface: python_sqlite3
+    stage: laboratory_and_shadow
+
+  readable_output_mirror:
+    runtime: mounted_runtime_directory
+    component: jsonl_and_latest_json
+    responsibility: simple inspection and compatibility
+    files:
+      - /runtime/predictions.jsonl
+      - /runtime/latest_prediction.json
+      - /runtime/health.json
+
+  presentation:
+    runtime: dashboard_or_dcs_hmi
+    responsibility: show advisory result, timestamp, quality, and service status
+    stage: dashboard_now_hmi_after_approval
+    operator_is_final_authority: true
+
+unresolved_production_interfaces:
+  - dcs_and_plc_vendor_versions
+  - kepware_endpoint_and_real_node_ids
+  - opc_ua_security_policy_certificates_and_identity
+  - firewall_route_between_docker_and_kepware_hosts
+  - plant_timestamp_and_clock_synchronization_policy
+  - laboratory_sample_time_and_entry_time_contract
+  - database_retention_backup_and_historian_integration
+  - approved_advisory_hmi_tags

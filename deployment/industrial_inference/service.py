@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -11,10 +12,12 @@ from typing import Any
 import pandas as pd
 from asyncua import Client
 
+from . import __version__
 from .buffer import RollingProcessBuffer
 from .configuration import load_configuration
 from .models import ModelRuntime
 from .quality import DataQualityShield
+from .storage import PredictionRepository
 
 
 class SequenceHandler:
@@ -45,25 +48,52 @@ class InferenceService:
         self.latest_prediction_path = Path(
             config["outputs"].get("latest_prediction_file", "/runtime/latest_prediction.json")
         )
+        self.run_id = str(uuid.uuid4())
+        self.repository = PredictionRepository(
+            config["outputs"]["sqlite_database"], config["outputs"]["sqlite_schema"]
+        )
         self.health_path.parent.mkdir(parents=True, exist_ok=True)
         self.prediction_path.parent.mkdir(parents=True, exist_ok=True)
         # The history file exists from startup, even while no prediction is possible.
         self.prediction_path.touch(exist_ok=True)
         self.last_processed_sequence: int | None = None
+        self.last_recorded_status: str | None = None
+        started_at = datetime.now(timezone.utc).isoformat()
+        self.repository.start_run(
+            run_id=self.run_id,
+            service_name=service["name"],
+            model_version=__version__,
+            inference_mode=service["mode"],
+            horizon_minutes=(service["forecast_horizon_minutes"]
+                             if service["mode"] == "target_anchored" else None),
+            started_at=started_at,
+            configuration={"service": service, "opc_endpoint": config["opc"]["endpoint"]},
+        )
 
     def health(self, status: str, **details: Any) -> None:
+        updated_at = datetime.now(timezone.utc).isoformat()
         payload = {
             "service": self.config["service"]["name"],
+            "run_id": self.run_id,
             "status": status,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": updated_at,
             "buffer_rows": len(self.buffer),
             **details,
         }
         temporary = self.health_path.with_suffix(".tmp")
         temporary.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         temporary.replace(self.health_path)
+        if status != self.last_recorded_status:
+            self.repository.add_event(
+                self.run_id, updated_at, status, details.get("sequence"),
+                details.get("message"), details,
+            )
+            self.last_recorded_status = status
 
     def append_prediction(self, prediction: dict[str, Any]) -> None:
+        prediction["run_id"] = self.run_id
+        # The database is the authoritative audit record; JSON remains a readable mirror.
+        self.repository.add_prediction(self.run_id, prediction)
         with self.prediction_path.open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(prediction, allow_nan=False) + "\n")
         temporary = self.latest_prediction_path.with_suffix(".tmp")
@@ -115,7 +145,6 @@ class InferenceService:
             "generated_at": prediction["generated_at"],
             "prediction_for": prediction["prediction_for"],
             "model_status": prediction["model_status"],
-            "process_familiarity": prediction["process_familiarity"],
             "input_quality": prediction["input_quality"],
             "model_version": prediction["model_version"],
         }
@@ -171,7 +200,12 @@ class InferenceService:
                 prediction.update({
                     "generated_at": datetime.now(timezone.utc).isoformat(),
                     "model_status": "RUNNING",
-                    "input_quality": "GOOD",
+                    "input_quality": decision.status,
+                    "imputed_inputs": [
+                        warning.removeprefix("imputed_inputs:")
+                        for warning in decision.warnings
+                        if warning.startswith("imputed_inputs:")
+                    ],
                     "sequence": sequence,
                 })
                 self.append_prediction(prediction)
@@ -179,7 +213,9 @@ class InferenceService:
                 self.health(
                     "RUNNING", sequence=sequence,
                     last_prediction_for=prediction["prediction_for"],
-                    process_familiarity=prediction["process_familiarity"],
+                    input_quality=decision.status,
+                    imputed_inputs=prediction["imputed_inputs"],
+                    rows_required=self.runtime.minimum_rows,
                 )
             except Exception as error:  # keep the subscriber alive; expose failure in health/log
                 logging.exception("Snapshot processing failed")
@@ -207,7 +243,7 @@ class InferenceService:
             try:
                 await self.run_connected()
             except Exception as error:
-                logging.exception("OPC connection failed")
+                logging.warning("OPC endpoint unavailable; retrying in %s seconds: %s", delay, error)
                 self.health("DISCONNECTED", reasons=[repr(error)])
                 await asyncio.sleep(delay)
 

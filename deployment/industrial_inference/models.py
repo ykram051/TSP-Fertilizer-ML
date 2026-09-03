@@ -4,20 +4,10 @@ from pathlib import Path
 from typing import Any
 
 import joblib
-import numpy as np
 import pandas as pd
 
 from . import __version__
 from .feature_engineering import FeatureBuilder, TARGET
-
-
-def _familiarity(score: float, threshold: float) -> tuple[str, float]:
-    ratio = score / max(threshold, 1e-12)
-    if ratio <= 0.75:
-        return "high", ratio
-    if ratio <= 1.0:
-        return "moderate", ratio
-    return "low", ratio
 
 
 class ModelRuntime:
@@ -37,14 +27,6 @@ class ModelRuntime:
         # The current row plus the structural lookback.
         return self.builder.maximum_lookback + 1
 
-    def _process_familiarity(self, features: pd.DataFrame) -> tuple[str, float, float]:
-        pipeline = self.virtual_metadata["notebook02_pipelines_by_set"]["D_full"]["standard"]
-        standardized = pipeline.transform(features)
-        score = float(np.sqrt(np.mean(np.square(standardized[-1]))))
-        threshold = float(self.virtual_metadata["drift_threshold_99pct"])
-        label, ratio = _familiarity(score, threshold)
-        return label, score, ratio
-
     def predict_target_free(self, frame: pd.DataFrame) -> dict[str, Any]:
         aligned, features = self.builder.build(frame)
         latest = features.tail(1)
@@ -53,16 +35,12 @@ class ModelRuntime:
         clusterer, experts, fallback = self.target_free["model"]
         cluster = int(clusterer.predict(standardized)[0])
         prediction = float(experts.get(cluster, fallback).predict(standardized)[0])
-        familiarity, drift_score, ratio = self._process_familiarity(latest)
         return {
             "mode": "target_free",
             "source_timestamp": pd.Timestamp(aligned.iloc[-1]["Date"]).isoformat(),
             "prediction_for": pd.Timestamp(aligned.iloc[-1]["Date"]).isoformat(),
             "predicted_slurry_free_acid": prediction,
             "predicted_change": None,
-            "process_familiarity": familiarity,
-            "drift_score": drift_score,
-            "drift_to_threshold_ratio": ratio,
             "assigned_statistical_cluster": cluster,
             "model_name": self.target_free["selected_candidate"]["name"],
             "model_version": __version__,
@@ -87,7 +65,6 @@ class ModelRuntime:
         delta = float(self.anchored["delta_models"][(horizon, "F_hybrid_full", "ridge")].predict(model_input)[0])
         current = float(pd.to_numeric(aligned.iloc[-1][TARGET], errors="raise"))
         source_time = pd.Timestamp(aligned.iloc[-1]["Date"])
-        familiarity, drift_score, ratio = self._process_familiarity(latest_features)
         return {
             "mode": "target_anchored",
             "horizon_minutes": horizon,
@@ -96,9 +73,6 @@ class ModelRuntime:
             "current_slurry_free_acid": current,
             "predicted_change": delta,
             "predicted_slurry_free_acid": current + delta,
-            "process_familiarity": familiarity,
-            "drift_score": drift_score,
-            "drift_to_threshold_ratio": ratio,
             "model_name": "ridge_delta_F_hybrid_full",
             "model_version": __version__,
             "test_status": "retrospective; later labeled plant data required",

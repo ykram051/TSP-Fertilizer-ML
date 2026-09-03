@@ -12,6 +12,7 @@ class QualityDecision:
     accepted: bool
     status: str
     reasons: tuple[str, ...]
+    warnings: tuple[str, ...] = ()
 
 
 class DataQualityShield:
@@ -24,8 +25,18 @@ class DataQualityShield:
         required = [name for name, meta in self.tags["inputs"].items() if meta.get("required")]
 
         missing = [name for name in required if name not in snapshot or pd.isna(snapshot[name])]
-        if missing:
-            reasons.append("missing_required:" + ",".join(missing))
+        warnings: list[str] = []
+        missing_share = len(missing) / max(len(required), 1)
+        allowed_share = float(
+            self.config["quality"].get("maximum_missing_required_share", 0.0)
+        )
+        if missing_share > allowed_share:
+            reasons.append(
+                f"excessive_missing_inputs:{len(missing)}/{len(required)}:"
+                + ",".join(missing)
+            )
+        elif missing:
+            warnings.append("imputed_inputs:" + ",".join(missing))
 
         if self.config["quality"]["reject_bad_or_uncertain"]:
             bad = [name for name in required if not qualities.get(name, False)]
@@ -48,8 +59,9 @@ class DataQualityShield:
                 reasons.append("outside_engineering_limits:" + ",".join(sorted(set(outside))))
 
         if reasons:
-            return QualityDecision(False, "DATA_ERROR", tuple(reasons))
-        return QualityDecision(True, "GOOD", ())
+            return QualityDecision(False, "DATA_ERROR", tuple(reasons), tuple(warnings))
+        status = "IMPUTED" if missing else "GOOD"
+        return QualityDecision(True, status, (), tuple(warnings))
 
     def laboratory_target_is_fresh(self, snapshot: dict[str, Any], source_time: pd.Timestamp) -> QualityDecision:
         policy = self.config["manual_laboratory_target"]
