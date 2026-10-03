@@ -1,0 +1,47 @@
+\chapter{Experimental Results and Model Selection}
+\section{Direct future-level benchmark}
+The first benchmark used process features to predict the absolute future target. Validation selected full-set Ridge at all horizons, but it did not beat the operational persistence baseline $\hat y_{t+h}=y_t$. Table~\ref{tab:direct-results} reports the untouched test result. This negative result was decisive because it showed that matching the current level is easier than predicting its movement.
+
+\begin{table}[H]\centering
+\caption{Direct future-level Ridge results on the held-out January period.}\label{tab:direct-results}
+\begin{tabular}{crrr}\toprule
+\textbf{Horizon} & \textbf{MAE} & \textbf{RMSE} & \textbf{RMSE change versus persistence}\\\midrule
+1 min & 0.269 & 0.332 & -67.9\%\\
+5 min & 0.275 & 0.338 & -35.1\%\\
+10 min & 0.280 & 0.344 & -22.6\%\\
+15 min & 0.304 & 0.378 & -27.5\%\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Target-anchored delta forecast}
+Ridge and Extra Trees received comparable tuning budgets on raw process, full exogenous, target-history and hybrid feature sets. Validation selected a hybrid Ridge model with $\alpha=10$ at every horizon. Table~\ref{tab:delta-results} shows that the reconstructed delta forecast improved RMSE over persistence at all tested horizons. The 10-minute setting had the largest relative gain, while the one-minute setting had the smallest absolute error. The operational horizon would still require a decision about reaction time and acceptable false or missed warnings.
+
+\begin{table}[H]\centering
+\caption{Target-anchored delta-Ridge test performance after future-level reconstruction.}\label{tab:delta-results}
+\begin{tabular}{crrrr}\toprule
+\textbf{Horizon} & \textbf{MAE} & \textbf{RMSE} & \textbf{$R^2$} & \textbf{RMSE improvement}\\\midrule
+1 min & 0.102 & 0.151 & 0.889 & 23.2\%\\
+5 min & 0.113 & 0.169 & 0.862 & 32.3\%\\
+10 min & 0.126 & 0.182 & 0.839 & 34.9\%\\
+15 min & 0.176 & 0.237 & 0.726 & 19.8\%\\\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:delta-results} combines delta performance, ablation and distribution-shift diagnostics. Accepted engineered features improved raw process input, while target history and process information supplied complementary predictive association. Candidate transition weighting slightly helped some local errors but worsened total RMSE, so it was not retained. A logistic transition classifier also remained diagnostic only because precision was low and false-warning rates were too high for an operational alarm.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{delta_transition_artifacts/figures/delta_performance_ablation_and_shift.png}
+\caption{Delta forecasting performance, ablation and distribution-shift diagnostic.}\label{fig:delta-results}
+\end{figure}
+
+\section{Target-free virtual sensor and stability research}
+The target-free study forbade current target, target history and future target columns. The validation-selected 50/50 Ridge-LightGBM blend achieved held-out MAE 0.249, RMSE 0.301 and $R^2=0.558$, compared with RMSE 0.454 for the training-mean baseline. Its empirical 90\% interval covered 89.7\% of January test points with mean width 1.015. It is an advisory diagnostic because the interval was calibrated from individual-Ridge validation residuals while the point estimate is a blend.
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.88\textwidth]{exogenous_virtual_sensor_artifacts/figures/virtual_sensor_performance.png}
+\caption{Target-free virtual-sensor comparison and diagnostics from Notebook 05.}\label{fig:virtual-sensor}
+\end{figure}
+
+Figure~\ref{fig:virtual-sensor} illustrates the selected virtual-sensor investigation. Subsequently, four-fold stability research found that five-cluster Ridge had mean RMSE 0.3280, standard deviation 0.0396 and worst-fold RMSE 0.3522. This was less favorable in mean RMSE than the 70/30 global Ridge-LightGBM blend at 0.3191, but materially steadier than its 0.0762 standard deviation and 0.4236 worst fold. The target-free runtime loads the five-cluster Ridge candidate for this stability-first reason.
+
+The later 80\% local and 20\% global hybrid achieved mean RMSE 0.3213, standard deviation 0.0413 and worst RMSE 0.3548. It remained a research candidate. JITL variants did not supersede the global blend. Since January had already been used during the sequence of experiments, retrospective refits cannot be presented as new test evidence. A later labeled month is needed before production-model replacement.

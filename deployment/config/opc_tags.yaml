@@ -5,6 +5,8 @@ system:
     node_id: ns=2;s=TSP.System.Sequence
   source_timestamp:
     node_id: ns=2;s=TSP.System.SourceTimestamp
+  replay_acknowledgement:
+    node_id: ns=2;s=TSP.System.ReplayAcknowledgement
 
 inputs:
   PRODUCTION_TSP_BALANCE:

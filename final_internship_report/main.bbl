@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{hoerl1970ridge}
+A.~E. Hoerl and R.~W. Kennard, ``Ridge regression: Biased estimation for nonorthogonal problems,'' {\em Technometrics}, vol.~12, no.~1, pp.~55--67, 1970.
+
+\bibitem{wold2001pls}
+S.~Wold, M.~Sjostrom, and L.~Eriksson, ``Pls-regression: A basic tool of chemometrics,'' {\em Chemometrics and Intelligent Laboratory Systems}, vol.~58, no.~2, pp.~109--130, 2001.
+
+\bibitem{ke2017lightgbm}
+G.~Ke {\em et~al.}, ``Lightgbm: A highly efficient gradient boosting decision tree,'' in {\em Advances in Neural Information Processing Systems}, vol.~30, 2017.
+
+\bibitem{bergmeir2018forecasting}
+C.~Bergmeir, R.~J. Hyndman, and B.~Koo, ``A note on the validity of cross-validation for evaluating autoregressive time series prediction,'' {\em Computational Statistics and Data Analysis}, vol.~120, pp.~70--83, 2018.
+
+\bibitem{molnar2020interpretability}
+C.~Molnar {\em et~al.}, ``General pitfalls of model-agnostic interpretation methods for machine learning models,'' {\em arXiv preprint arXiv:2007.04131}, 2020.
+
+\bibitem{opcua}
+``Opc unified architecture specification,'' 2024.
+
+\end{thebibliography}

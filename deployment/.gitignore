@@ -3,3 +3,7 @@ runtime/*
 !runtime/.gitkeep
 __pycache__/
 .pytest_cache/
+.dashboard-build/
+dashboard/build/
+dashboard/*.spec
+dashboard/tsp_dashboard.exe

@@ -1,0 +1,13 @@
+\chapter{Model Interpretability}
+The project did not run SHAP analysis. The notebooks state this explicitly and instead use model-agnostic permutation importance, grouped source and feature-family importance, Ridge coefficient inspection, and importance-stability diagnostics. This is a useful methodological distinction because it avoids claiming a SHAP result that was never generated.
+
+Permutation importance measures the deterioration in prediction performance when a feature is disrupted. Ridge coefficients describe the fitted linear contribution after scaling. Neither method establishes process causality, controllability, or a safe intervention, a general limitation of model-agnostic explanation methods \cite{molnar2020interpretability}. In this project, importance was used to check whether feature families and accepted process variables contributed predictive association, and to guide discussions with process engineers.
+
+The dashboard and notebooks also inspect candidate transitions using a multivariate normalized process-change score. The score is a diagnostic of joint sensor movement. It is not target change, an identified startup or shutdown, a causal attribution, or a model output. This distinction is important because the available data does not include validated event labels.
+
+Figure~\ref{fig:importance} presents the existing benchmark interpretation material. It should be read together with the feature registry: some variables have provisional units, uncertain stream meanings, or unconfirmed controllability. The correct use of this analysis is to prioritize validation questions, not to recommend changing a process variable.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{prediction_benchmark_artifacts/figures/grouped_importance_and_horizon_stability.png}
+\caption{Grouped predictive importance and horizon stability from the direct-benchmark analysis.}\label{fig:importance}
+\end{figure}

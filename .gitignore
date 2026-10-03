@@ -21,6 +21,7 @@ __pycache__/
 
 # Local source data: do not publish plant data through Git
 /tsp_1min.csv
+/dist/
 
 # Reproducible table exceeding GitHub's regular per-file limit
 /reports/prediction_benchmark_artifacts/residuals_with_candidate_regimes.csv

@@ -1,0 +1,24 @@
+\chapter{Machine Learning Methodology}
+\section{Problem formulation}
+Let $x_t$ denote the process information available at minute $t$ and $y_t$ the free-acid measurement. Direct forecasting learns $f_h(x_{\leq t})\approx y_{t+h}$ for horizons $h\in\{1,5,10,15\}$ minutes. Because a current observed level is very persistent over short periods, the project also evaluated delta forecasting:
+\begin{equation}\label{eq:delta}
+\Delta y_{t,h}=y_{t+h}-y_t,\qquad \hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h}.
+\end{equation}
+Equation~\ref{eq:delta} focuses the model on future movement rather than reproducing a known current level. It is valid only when the laboratory target is available and fresh. Target-free virtual sensing instead learns $g(x_{\leq t})\approx y_t$ without any current or historical target feature.
+
+Performance is reported with MAE and RMSE:
+\begin{equation}
+\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat y_i|,\qquad
+\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat y_i)^2}.
+\end{equation}
+RMSE gives additional weight to larger errors, which is useful for identifying unstable periods, while MAE is readily interpretable as average absolute deviation.
+
+\section{Chronological validation}
+The baseline split is the first 70\% for training, the next 15\% for validation and the final 15\% for test. Random shuffling was not used because adjacent one-minute samples are dependent and could make near-identical states appear in training and test. Preprocessing, lag selection, clipping limits, correlation filtering, hyperparameters and blend weights were learned without test fitting.
+
+Later stability work used four expanding chronological blocks. For each fold, imputation, scaling, clustering and local experts were fitted on the preceding rows only. This produces a distribution of fold errors rather than a single validation number, allowing mean performance, variability and worst-block behaviour to influence selection.
+
+\section{Models investigated}
+Ridge regression was retained as a regularized linear reference for correlated engineered features \cite{hoerl1970ridge}. Extra Trees and Histogram Gradient Boosting were used in the direct benchmark to test nonlinear interactions. The target-free study additionally considered PLS \cite{wold2001pls}, KNN, XGBoost or LightGBM \cite{ke2017lightgbm} where available, and validation-weighted blends. The final Notebook 05 target-free baseline was a 50/50 Ridge-LightGBM blend. Chronological validation follows the need to respect serial dependence in time-series evaluation \cite{bergmeir2018forecasting}.
+
+The robustness notebooks compared global blends, KMeans-partitioned local Ridge experts, a global/local hybrid and JITL variants using PCA or PLS representation with nearest neighbours. KMeans clusters are statistical feature-space groups, not confirmed operating regimes. JITL did not produce a selection improvement over the global blend.

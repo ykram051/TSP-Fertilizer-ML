@@ -5,6 +5,9 @@ service:
   cadence_seconds: 60
   cadence_tolerance_seconds: 5
   maximum_buffer_rows: 180
+  # Health is refreshed even when no new OPC record arrives. The dashboard
+  # uses it to distinguish a quiet process from a disconnected service.
+  heartbeat_interval_seconds: 5
   runtime_directory: /runtime
 
 opc:
@@ -15,6 +18,10 @@ opc:
   password_environment_variable: OPC_PASSWORD
   subscription_period_ms: 100
   reconnect_delay_seconds: 5
+  # While quiet, verify that the OPC sequence node is still readable. This
+  # detects a broken subscription or gateway restart without treating a normal
+  # one-minute plant cadence as an error.
+  sequence_watchdog_poll_seconds: 5
 
 manual_laboratory_target:
   variable: SLURRY_FREE_ACID
@@ -45,3 +52,8 @@ simulator:
   replay_interval_seconds: 1.00
   loop: false
   laboratory_update_every_rows: 60
+  # Laboratory-only flow control. It prevents a fast CSV replay from skipping
+  # historical rows while the model is calculating a prediction. Disable this
+  # in a real OPC/Kepware deployment; plant data arrives at its native cadence.
+  flow_control_acknowledgement_enabled: true
+  acknowledgement_timeout_seconds: 120

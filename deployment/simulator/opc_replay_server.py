@@ -42,6 +42,13 @@ async def run() -> None:
         input_nodes[name] = await create_variable(input_folder, metadata["node_id"], name, initial)
 
     sequence = await create_variable(system_folder, tags["system"]["sequence"]["node_id"], "Sequence", 0)
+    acknowledgement = await create_variable(
+        system_folder,
+        tags["system"]["replay_acknowledgement"]["node_id"],
+        "ReplayAcknowledgement",
+        0,
+    )
+    await acknowledgement.set_writable()
     source_timestamp = await create_variable(
         system_folder, tags["system"]["source_timestamp"]["node_id"], "SourceTimestamp", ""
     )
@@ -52,6 +59,8 @@ async def run() -> None:
         await output_nodes[name].set_writable()
 
     laboratory_every = int(simulator["laboratory_update_every_rows"])
+    flow_control = bool(simulator.get("flow_control_acknowledgement_enabled", False))
+    acknowledgement_timeout = float(simulator.get("acknowledgement_timeout_seconds", 120))
     latest_lab_value, latest_lab_time = None, None
     async with server:
         logging.info("OPC UA simulator listening on port 4840 with %s CSV rows", len(frame))
@@ -73,6 +82,17 @@ async def run() -> None:
 
                 await source_timestamp.write_value(row["Date"].isoformat())
                 await sequence.write_value(int(position + 1))  # commit marker written last
+                if flow_control:
+                    # Laboratory-only back-pressure: do not make historical time
+                    # advance faster than the subscriber can read each row.
+                    deadline = asyncio.get_running_loop().time() + acknowledgement_timeout
+                    while int(await acknowledgement.read_value()) < int(position + 1):
+                        if asyncio.get_running_loop().time() >= deadline:
+                            raise TimeoutError(
+                                f"Inference acknowledgement did not reach sequence {position + 1} "
+                                f"within {acknowledgement_timeout:.0f}s"
+                            )
+                        await asyncio.sleep(0.02)
                 await asyncio.sleep(float(simulator["replay_interval_seconds"]))
             if not simulator["loop"]:
                 logging.info("CSV replay completed; server remains available")

@@ -1,0 +1,46 @@
+name: tsp-slurry-free-acid-advisory
+
+services:
+  opc-simulator:
+    image: tsp-slurry-free-acid-lab-opc-simulator:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.simulator
+    environment:
+      SERVICE_CONFIG: /config/service.yaml
+      TAG_CONFIG: /config/opc_tags.yaml
+      REPLAY_INTERVAL_SECONDS: ${REPLAY_INTERVAL_SECONDS:-1.00}
+    volumes:
+      - ./config:/config:ro
+      - ./data/tsp_1min.csv:/data/tsp_1min.csv:ro
+    ports:
+      - "4840:4840"
+    networks: [industrial-lab]
+    restart: "no"
+
+  inference-service:
+    image: tsp-slurry-free-acid-lab-inference-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.inference
+    depends_on:
+      - opc-simulator
+    environment:
+      SERVICE_CONFIG: /config/service.yaml
+      TAG_CONFIG: /config/opc_tags.yaml
+      ARTIFACT_ROOT: /artifacts
+      OPC_ENDPOINT: ${OPC_ENDPOINT:-opc.tcp://opc-simulator:4840/tsp-simulator/}
+      INFERENCE_MODE: ${INFERENCE_MODE:-target_free}
+      FORECAST_HORIZON_MINUTES: ${FORECAST_HORIZON_MINUTES:-10}
+      ADVISORY_WRITE_ENABLED: ${ADVISORY_WRITE_ENABLED:-false}
+    volumes:
+      - ./config:/config:ro
+      - ./database:/database:ro
+      - ./artifacts:/artifacts:ro
+      - ./runtime:/runtime
+    networks: [industrial-lab]
+    restart: unless-stopped
+
+networks:
+  industrial-lab:
+    driver: bridge

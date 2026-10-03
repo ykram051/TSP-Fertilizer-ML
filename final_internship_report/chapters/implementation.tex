@@ -1,0 +1,32 @@
+\chapter{Real-Time Processing and Deployment Implementation}
+\section{Stage 1 CSV replay}
+Stage 1 reproduces a streaming environment without plant access. The simulator reads the confidential historical CSV, publishes row values as OPC UA tags, sends source timestamp and then writes a sequence number as a commit marker. It can update the simulated laboratory target every 60 rows. This replay validates tag mapping, coherent snapshot acquisition, buffering, model loading, storage and restart behavior. It is a laboratory simulation, not a real PLC/DCS deployment.
+
+\section{Streaming pipeline and quality controls}
+The inference service subscribes to the sequence tag rather than polling every sensor repeatedly. It reads sequence, input tags and sequence again, accepting a snapshot only when the sequence values agree. This avoids a mixed snapshot spanning two replay rows. Accepted snapshots pass through a quality shield that checks OPC quality, timestamp order and cadence, impossible values and the share of missing required inputs.
+
+Isolated missing cells are accepted as \texttt{IMPUTED}, then handled by the saved training-fitted imputer and missingness indicators. A snapshot with more than 25\% missing required inputs, bad or uncertain quality, or an invalid chronology is rejected as \texttt{DATA\_ERROR}. The service never fits preprocessing during live inference.
+
+\section{Warm-up and supported modes}
+The maximum feature lookback is 30 minutes. A cold start requires the current row plus those 30 previous rows, hence 31 accepted rows before valid inference. Until then the service reports \texttt{WARMING\_UP}; it does not fabricate history. A production improvement would be historian backfill, followed by carefully validated persistent-buffer restoration.
+
+The \texttt{target\_free} mode estimates the current target from process signals. The \texttt{target\_anchored} mode requires the current laboratory value and its timestamp, then produces 1-, 5-, 10- or 15-minute delta forecasts. The configuration rejects a manual target that is missing, future-dated or older than 120 minutes. This protects the system from treating an outdated laboratory result as a real-time analyzer.
+
+\section{Heartbeat, watchdogs and recovery}
+The service refreshes health information every five seconds, including periods with no new source row. The desktop dashboard reads health every two seconds and can use a 30-, 90- or 180-second watchdog threshold, or disable the alert. This distinguishes an expected quiet process from stale service information. The dashboard reads SQLite trend history every ten seconds and uses deterministic connection closing to avoid Windows locking issues.
+
+The OPC sequence watchdog polls the sequence node while the source is quiet, which can reveal a broken subscription or gateway reset. Connection closure or sequence reset clears incompatible buffer history, enters \texttt{DISCONNECTED}, and follows bounded reconnect attempts. After restoration, a new \texttt{run\_id} is created, the buffer warms up again, and old-run predictions are not presented as current-run values. The simulator has an acknowledgement mechanism that waits for inference to process each sequence. This is intentionally laboratory-only flow control and must be disabled with a real Kepware or plant source.
+
+\begin{table}[H]\centering
+\caption{Operational states exposed by the inference service.}\label{tab:states}
+\begin{tabularx}{\textwidth}{L{0.25\textwidth}Y}\toprule
+\textbf{State} & \textbf{Meaning}\\\midrule
+STARTING or CONNECTED & The service has started or has an OPC session but no model-ready history.\\
+WARMING\_UP & Accepted history is accumulating toward the 31-row requirement.\\
+RUNNING & A recent accepted snapshot has produced a prediction.\\
+DATA\_ERROR & A material data-quality or chronology rule blocked inference.\\
+DISCONNECTED & OPC communication failed or reset; reconnection is attempted.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:states} makes the dashboard useful as a monitoring surface without suggesting that it controls production. The dashboard presents current prediction and quality cards, a trend view, imputed-input markers, delta versus the previous prediction and a heartbeat watchdog. It reads runtime output only.

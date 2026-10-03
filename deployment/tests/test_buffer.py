@@ -17,6 +17,9 @@ def test_buffer_requires_monotonic_timestamps():
 def test_large_gap_resets_history():
     buffer = RollingProcessBuffer(10, 60, 5)
     buffer.append({"Date": pd.Timestamp("2026-01-01T00:00:00Z"), "x": 1})
-    buffer.append({"Date": pd.Timestamp("2026-01-01T00:02:00Z"), "x": 2})
+    reset = buffer.append({"Date": pd.Timestamp("2026-01-01T00:02:00Z"), "x": 2})
+    assert reset is True
     assert len(buffer) == 1
     assert buffer.frame().iloc[0]["x"] == 2
+    assert buffer.reset_count == 1
+    assert "timestamp gap" in buffer.last_reset_reason

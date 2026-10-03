@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +28,7 @@ class PredictionRepository:
         return connection
 
     def initialize(self) -> None:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection, connection:
             connection.executescript(self.schema_path.read_text(encoding="utf-8"))
 
     def start_run(
@@ -40,7 +41,7 @@ class PredictionRepository:
         started_at: str,
         configuration: dict[str, Any],
     ) -> None:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection, connection:
             connection.execute(
                 """INSERT INTO service_runs (
                        run_id, service_name, model_version, inference_mode,
@@ -54,7 +55,7 @@ class PredictionRepository:
             )
 
     def add_prediction(self, run_id: str, prediction: dict[str, Any]) -> None:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection, connection:
             connection.execute(
                 """INSERT INTO predictions (
                        run_id, sequence, source_timestamp, prediction_for, generated_at,
@@ -92,7 +93,7 @@ class PredictionRepository:
         message: str | None,
         details: dict[str, Any],
     ) -> None:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection, connection:
             connection.execute(
                 """INSERT INTO service_events (
                        run_id, event_time, status, sequence, message, details_json
@@ -102,7 +103,7 @@ class PredictionRepository:
             )
 
     def summary(self) -> dict[str, Any]:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection:
             totals = connection.execute(
                 """SELECT COUNT(*) AS predictions,
                           COUNT(DISTINCT run_id) AS runs,
@@ -117,7 +118,7 @@ class PredictionRepository:
         return {**dict(totals), "quality_counts": [dict(row) for row in quality]}
 
     def latest(self, limit: int = 10) -> list[dict[str, Any]]:
-        with self.connect() as connection:
+        with closing(self.connect()) as connection:
             rows = connection.execute(
                 """SELECT run_id, sequence, source_timestamp, prediction_for,
                           predicted_slurry_free_acid, input_quality, model_name
@@ -129,7 +130,7 @@ class PredictionRepository:
     def export_csv(self, output_path: str | Path) -> int:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.connect() as connection:
+        with closing(self.connect()) as connection:
             cursor = connection.execute("SELECT * FROM predictions ORDER BY prediction_id")
             rows = cursor.fetchall()
             names = [item[0] for item in cursor.description]

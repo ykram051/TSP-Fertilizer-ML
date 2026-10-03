@@ -17,6 +17,21 @@ It does **not** retrain a model and it does **not** replace PLC/DCS control.
    with `scripts/export_predictions.ps1`.
 7. Stop the laboratory environment with `scripts/stop_stage1.ps1`.
 
+## Native Windows dashboard and release ZIP
+
+Build the one-file desktop dashboard, then create a self-contained supervisor
+package:
+
+```powershell
+.\scripts\build_dashboard.ps1
+.\scripts\package_release.ps1
+```
+
+Use `package_release.ps1 -IncludeDockerImages` when the recipient may not have
+internet access for the initial Docker build. This makes the ZIP much larger.
+The release packager copies only the model artifacts required at inference and
+rewrites Compose paths so nothing points outside the delivered folder.
+
 ## Directory map
 
 | Path | Purpose |

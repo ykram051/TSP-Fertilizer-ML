@@ -1,0 +1,20 @@
+\chapter{Internship Context and Problem Definition}
+\section{TSP monitoring context}
+The confirmed target is \texttt{SLURRY\_FREE\_ACID}. Consequently, the project separates three contracts: direct future-level prediction, target-anchored forecasting and target-free current-time estimation. This separation is central to the validity of the conclusions.
+
+Direct future-level prediction uses process information available at time $t$ to estimate $y_{t+h}$. Target-anchored forecasting is allowed to use a fresh current laboratory result $y_t$ and estimates its future change. Target-free virtual sensing estimates the present value from process variables only. The latter is not an early-warning forecast.
+
+\begin{table}[H]\centering
+\caption{Operational prediction contracts evaluated in the project.}\label{tab:contracts}
+\begin{tabularx}{\textwidth}{L{0.25\textwidth}Y Y}\toprule
+\textbf{Contract} & \textbf{Inputs} & \textbf{Output}\\\midrule
+Direct level & Process measurements at or before $t$ & $\hat y_{t+h}$\\
+Target anchored & Process information and fresh $y_t$ & $\hat y_{t+h}$ through predicted change\\
+Target free & Process information only & Current estimate $\hat y_t$\\\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:contracts} prevents a common industrial error: presenting a current estimate as a future warning, or using a laboratory value as though it were a live sensor. The constraints also include time ordering, missing data, unknown unit semantics for several tags, limited data coverage, and the requirement that a model failure must not affect plant control.
+
+\section{Evolution of the work}
+The work evolved from exploration to feature preparation, direct benchmarks, delta forecasting, a target-free virtual sensor, robustness research, dashboard development and a replay-based integration prototype. The final deployment code retains the target-free five-cluster Ridge candidate as a stability-oriented model. The target-anchored Ridge delta model remains a separate configurable mode. Neither is presented as a closed-loop controller or as fully validated on future production periods.

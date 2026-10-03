@@ -1,0 +1,22 @@
+\chapter{Deployment Architecture}
+\section{Architecture and safety boundary}
+The implementation is a staged, advisory-only architecture. Figure~\ref{fig:deployment-architecture} summarizes the intended information path. Sensors and laboratory information are organized by PLC/DCS systems. Kepware is the intended industrial gateway: it communicates southbound with approved plant protocols and exposes configured tags northbound through OPC UA \cite{opcua}. The Python inference service reads those tags, prepares features and writes predictions to local audit storage and the dashboard. The optional advisory OPC namespace is disabled by default.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=4mm and 4mm,box/.style={draw=OcpGreen,rounded corners,fill=LightGray,minimum height=11mm,text width=2.35cm,align=center,font=\small},arr/.style={-{Latex[length=2mm]},thick,draw=OcpGreen}]
+\node[box](s){Sensors and laboratory result};
+\node[box,right=of s](p){PLC or DCS};
+\node[box,right=of p](k){Kepware and OPC UA};
+\node[box,right=of k](i){Docker inference service};
+\node[box,right=of i](d){SQLite and dashboard};
+\draw[arr](s) to (p); \draw[arr](p) to (k); \draw[arr](k) to (i); \draw[arr](i) to (d);
+\end{tikzpicture}
+\caption{Advisory information flow implemented and planned for industrial integration.}\label{fig:deployment-architecture}
+\end{figure}
+
+The model has no path to modify PLC/DCS setpoints, controller modes, interlocks, permissives, valve commands, pumps or safety logic. A service, network, database or dashboard failure must leave control independent. A real connection still requires approved endpoint details, certificates, security policy, Node IDs, firewall routes, quality semantics and IT/OT authorization. The repository uses placeholder mapping values for this purpose.
+
+\section{Containers, services and configuration}
+Docker Compose defines two services on an isolated bridge network: an OPC UA CSV-replay simulator and a Python inference service. Both use Python 3.11 slim images. The inference image installs required packages and \texttt{libgomp1} for the LightGBM runtime, runs a health check, and mounts configuration, model artifacts, schema and runtime output. Runtime settings, including mode, horizon, endpoint and advisory-write setting, can be supplied through environment variables. Node IDs are externalized in \texttt{opc\_tags.yaml}, not embedded in Python.
+
+SQLite is the authoritative Stage 1 audit store, with JSONL and latest-JSON mirrors for convenient inspection. It records service runs, predictions and status events. WAL mode permits a read-only dashboard to query history while the service writes. This is appropriate for a local demonstration with one writer; it is not claimed as a replacement for a plant historian, central retention policy or backup design.

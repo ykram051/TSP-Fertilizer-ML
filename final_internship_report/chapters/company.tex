@@ -1,0 +1,18 @@
+\chapter{Company Presentation}
+\section{OCP Group}
+The OCP Group is a leading global producer of phosphate-based plant nutrition solutions and holds custody of approximately 68\% of the world's estimated phosphate reserves.
+
+\subsection*{Key Overview}
+\begin{itemize}
+    \item \textbf{Founded:} 1920 in Morocco as Office Chérifien des Phosphates.
+    \item \textbf{Headquarters:} Casablanca, Morocco.
+    \item \textbf{Core Activities:} Mining phosphate rock, producing phosphoric acid, and manufacturing customized fertilizers for global agriculture.
+    \item \textbf{Global Reach:} Serves clients across five continents with an integrated value chain spanning extraction, processing, and shipping.
+    \item \textbf{Recent Performance:} Reported a revenue of MAD 48.4 billion for the first half of 2026, maintaining a resilient EBITDA margin of 28\% despite global market challenges and high sulfur costs.
+\end{itemize}
+
+\section{Industrial activities relevant to the project}
+The project concerns the conversion of production measurements into information useful for process monitoring. The data dictionary identifies flows, temperatures, pressures, levels, recycle-related measurements and a free-acid target. These are characteristic of a production environment in which material feed, thermal conditions, slurry handling and drying-related signals are observed over time. The model does not replace process control. It produces an advisory estimate or forecast from read-only measurements.
+
+\section{Relevant technical roles}
+The implementation crosses several engineering roles. Process and production teams validate signal meaning, units, stream pairing, operating events and acceptable error. Automation and control teams own PLC/DCS logic, safety functions and industrial tags. Industrial IT and OT teams govern the OPC UA endpoint, certificates, host placement and firewall path. Data and software engineers maintain the feature contract, models, containers, storage and dashboard. Maintenance contributes sensor and communications context. The repository explicitly leaves several of these confirmations pending, which is appropriate for a staged industrial prototype.
