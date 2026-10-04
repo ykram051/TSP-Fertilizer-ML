@@ -1,185 +1,116 @@
-# TSP Fertilizer Machine Learning Dashboard
+# TSP Fertilizer Process Intelligence
 
-## Overview
+An internship research project for exploring Triple Super Phosphate (TSP)
+production data and evaluating machine-learning approaches for predicting
+`SLURRY_FREE_ACID`. The repository contains the research notebooks, saved
+research artifacts, an analytics dashboard, and an advisory-only OPC UA
+laboratory prototype.
 
-This project aims to analyze industrial production data from the Triple Super Phosphate (TSP) manufacturing process and develop a machine learning model capable of predicting critical production parameters. The trained model will be deployed within a real-time dashboard to assist operators in monitoring the production process and supporting data-driven decision making.
+> **Data and safety:** Plant data is confidential and is not included. The
+> inference prototype is read-only and advisory; it does not control PLC/DCS
+> equipment or replace operator judgment.
 
-> **Note:** This project is part of an engineering internship. All proprietary production data remains confidential and is not included in this repository.
+## Project contents
 
-## Industrial deployment prototype
+| Path | Description |
+| --- | --- |
+| [`notebooks/`](notebooks/) | Chronological data preparation, feature engineering, model evaluation, forecasting, and model-upgrade research |
+| [`reports/`](reports/) | Saved model artifacts, feature metadata, benchmark results, and research reports |
+| [`Web_dashboard/`](Web_dashboard/) | Browser-based process analytics dashboard and local prediction API |
+| [`deployment/`](deployment/) | OPC UA CSV-replay simulator, inference service, SQLite history, native Windows dashboard, tests, and deployment documentation |
+| [`final_internship_report/`](final_internship_report/) | Final report sources and presentation material |
 
-The advisory-only Docker and OPC UA laboratory package is documented in
-[`deployment/README.md`](deployment/README.md). It separates the physical/DCS
-architecture, Kepware and OPC UA, Docker packaging, CSV replay, read-only shadow
-mode, advisory HMI outputs, unresolved plant questions, tag mapping, simulator
-code and inference-service code.
+## Model and runtime contract
 
----
+- The deployed feature builder produces **178 features** and requires **31
+  contiguous one-minute rows** before its first prediction.
+- The target-free virtual sensor can run without a current laboratory target.
+  Target-anchored early warning requires current and historical
+  `SLURRY_FREE_ACID` measurements.
+- The research artifacts are loaded as saved; the runtime does not retrain
+  models.
+- The prototype rejects invalid OPC quality and real timestamp gaps. Isolated
+  missing process values can be imputed by the saved pipeline.
+- The virtual sensor's current validation is within-month chronological
+  validation. Additional labeled months are needed to establish
+  cross-month performance.
 
-## Objectives
+See [`deployment/README.md`](deployment/README.md) for the laboratory
+architecture, operating instructions, and safety boundary.
 
-- Analyze historical production data
-- Perform data preprocessing and feature engineering
-- Explore relationships between process variables
-- Develop and compare machine learning models
-- Evaluate model performance
-- Deploy the best-performing model
-- Build a real-time dashboard for monitoring and prediction
+## Run the deployment tests
 
----
-## Project Structure
+The inference Docker image uses Python 3.11. Use the same Python version for
+local test runs:
 
-```text
-tsp-fertilizer-ml/
-│
-├── .github/                     # GitHub workflows (CI/CD)
-│   └── workflows/
-│
-├── data/
-│   ├── raw/                     # Original production data (not tracked)
-│   ├── processed/               # Cleaned and transformed datasets
-│   ├── external/                # External/reference datasets
-│   └── sample/                  # Sample data for testing/demo
-│
-├── notebooks/                   # Jupyter notebooks
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_data_preprocessing.ipynb
-│   ├── 03_feature_engineering.ipynb
-│   ├── 04_model_training.ipynb
-│   └── 05_model_evaluation.ipynb
-│
-├── src/
-│   ├── data/
-│   │   ├── load_data.py
-│   │   ├── preprocess.py
-│   │   └── validation.py
-│   │
-│   ├── features/
-│   │   └── feature_engineering.py
-│   │
-│   ├── models/
-│   │   ├── train.py
-│   │   ├── predict.py
-│   │   ├── evaluate.py
-│   │   └── tuning.py
-│   │
-│   ├── dashboard/
-│   │   ├── app.py
-│   │   ├── pages/
-│   │   └── components/
-│   │
-│   ├── deployment/
-│   │   ├── api.py
-│   │   └── inference.py
-│   │
-│   ├── visualization/
-│   │   └── plots.py
-│   │
-│   └── utils/
-│       ├── config.py
-│       ├── logger.py
-│       └── helpers.py
-│
-├── models/                      # Saved trained models
-│   ├── best_model.pkl
-│   └── scaler.pkl
-│
-├── reports/
-│   ├── figures/
-│   ├── metrics/
-│   └── final_report.pdf
-│
-├── tests/                       # Unit tests
-│   ├── test_data.py
-│   ├── test_features.py
-│   └── test_models.py
-│
-├── docs/                        # Documentation
-│
-├── config/
-│   └── config.yaml
-│
-├── requirements.txt
-├── .gitignore
-├── README.md
-├── LICENSE
-└── Dockerfile
+```powershell
+cd deployment
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements-test.txt
+python -m pytest
 ```
 
-## Workflow
+The test requirements include the pinned runtime dependencies and `pytest`.
+The model-runtime smoke tests exercise the checked-in artifacts and verify the
+feature-count and warm-up contract. The same test command runs in
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) on pushes and pull
+requests.
 
-1. Data Collection
-2. Data Cleaning
-3. Exploratory Data Analysis (EDA)
-4. Feature Engineering
-5. Model Training
-6. Model Evaluation
-7. Model Deployment
-8. Real-Time Dashboard
+## Run the browser dashboard
 
----
+The dashboard requires Node.js 22.13 or later and Python 3.11:
 
-## Technologies
+```powershell
+cd Web_dashboard
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+npm ci
+.\start_dashboard.ps1
+```
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- Plotly
-- Streamlit
-- FastAPI *(optional)*
-- Docker *(optional)*
-- PostgreSQL / SQL
-- Git & GitHub
+The launcher starts the local API and Next.js development server. The default
+dashboard data is a demonstration sample, not confidential plant data. See
+[`Web_dashboard/README.md`](Web_dashboard/README.md) for supported analysis
+modes and CSV expectations.
 
----
+## Run the OPC UA laboratory prototype
 
-## Machine Learning Pipeline
-          Production Data
-                │
-                ▼
-          Data Cleaning
-                │
-                ▼
-          Feature Engineering
-                │
-                ▼
-          Model Training
-                │
-                ▼
-          Model Evaluation
-                │
-                ▼
-          Deployment
-                │
-                ▼
-          Real-Time Dashboard
+The Stage 1 lab replays a local CSV through a simulated OPC UA endpoint and
+persists predictions to SQLite. It requires Docker Desktop and a local
+one-minute CSV with the expected process columns. The source plant dataset is
+intentionally excluded from Git; obtain an approved copy before starting the
+simulator.
 
+From PowerShell:
 
----
+```powershell
+cd deployment
+Copy-Item .env.example .env
+.\scripts\start_stage1.ps1
+.\scripts\monitor_stage1.ps1
+```
 
-## Current Status
+Stop the lab with `.\scripts\stop_stage1.ps1`. The full setup, status, export,
+and native Windows dashboard instructions are in
+[`deployment/README.md`](deployment/README.md).
 
-- [ ] Understand production process
-- [ ] Explore dataset
-- [ ] Data preprocessing
-- [ ] Exploratory Data Analysis
-- [ ] Feature engineering
-- [ ] Baseline model
-- [ ] Model comparison
-- [ ] Hyperparameter tuning
-- [ ] Model deployment
-- [ ] Dashboard development
-- [ ] Documentation
+## Research workflow
 
----
+The notebooks progress from data exploration and feature preparation through
+benchmarking, delta forecasting, target-free virtual sensing, and model
+upgrades. Run them in order when reproducing the research. Source data is not
+distributed, so notebook execution requires an authorized local dataset and
+the input paths expected by each notebook.
 
-## Notes
+## Limitations
 
-This repository contains only development code and documentation. No confidential industrial datasets or sensitive production information are included.
-
----
-
-## License
-
-This project is intended for educational and internship purposes.
+- OPC UA node IDs and plant integration details remain environment-specific.
+- The simulator and default configuration are for a lab environment; they are
+  not production credentials or a production security configuration.
+- Model output is predictive, not causal, and is not an operating instruction.
+- Performance claims should be interpreted against the validation design and
+  available labeled data described in the reports.

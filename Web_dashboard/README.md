@@ -2,12 +2,28 @@
 
 Interactive dashboard for process exploration, target-free virtual sensing, target-anchored early warning, drift monitoring, and report generation.
 
-## Start
+## Requirements
 
-From PowerShell, run:
+- Node.js 22.13 or later
+- Python 3.11
+
+## Install and start
+
+From this directory, create an environment and install the Python API and
+JavaScript dependencies:
 
 ```powershell
-.\dashboard\start_dashboard.ps1
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+npm ci
+```
+
+Then launch from this directory:
+
+```powershell
+.\start_dashboard.ps1
 ```
 
 The launcher starts the local prediction service and opens the dashboard at `http://localhost:3000`.
