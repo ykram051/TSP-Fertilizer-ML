@@ -8,16 +8,24 @@ Two operational questions follow. First, can the free acid be \emph{estimated no
 \section{Objectives}
 The general objective was a transparent, reproducible and strictly advisory prototype for free-acid monitoring. It was broken down into six specific objectives:
 \begin{enumerate}
-\item characterise the historian extract (cadence, gaps, extremes, variable semantics);
-\item build a leakage-controlled, time-respecting feature contract (Chapter~\ref{ch:data});
-\item compare baselines and models under chronological validation (Chapters~\ref{ch:method} and~\ref{ch:results});
-\item separate future forecasting from current-time virtual sensing;
-\item assess robustness across chronological folds and select a model on stability, not only on mean error;
-\item connect the saved artifacts to a read-only streaming architecture with a monitoring dashboard (Chapter~\ref{ch:deploy}).
+\item Characterise the historian extract (cadence, gaps, extremes, variable semantics);
+\item Build a leakage-controlled, time-respecting feature contract (Chapter~\ref{ch:data});
+\item Compare baselines and models under chronological validation (Chapters~\ref{ch:method} and~\ref{ch:results});
+\item Separate future forecasting from current-time virtual sensing;
+\item Assess robustness across chronological folds and select a model on stability, not only on mean error;
+\item Connect the saved artifacts to a read-only streaming architecture with a monitoring dashboard (Chapter~\ref{ch:deploy}).
 \end{enumerate}
 
 \section{Main contributions}
-The work produced (i) a documented feature contract of 178 engineered features per sample built from 21 sensors; (ii) a target-anchored delta forecast whose RMSE beats the persistence baseline by 19.8\% to 34.9\% on the held-out period (Table~\ref{tab:forecast}); (iii) a target-free virtual sensor with an empirical 90\% interval and an out-of-envelope flag; (iv) a stability-oriented selection of a five-cluster Ridge model; and (v) a Docker/OPC UA replay prototype with data-quality shielding, SQLite audit storage and a native desktop dashboard.
+The work produced :
+\begin{enumerate}
+  \item A documented feature contract of 178 engineered features per sample built from 21 sensors; 
+  \item A target-anchored delta forecast whose RMSE beats the persistence baseline by 19.8\% to 34.9\% on the held-out period (Table~\ref{tab:forecast}); 
+  \item A target-free virtual sensor with an empirical 90\% interval and an out-of-envelope flag; 
+  \item A stability-oriented selection of a five-cluster Ridge model; 
+  \item A Docker/OPC UA replay prototype with data-quality shielding, SQLite audit storage and a native desktop dashboard.
+\end{enumerate}
+
 
 \section{Organisation of the report}
 Chapter~\ref{ch:company} presents OCP Group, its activities, structure and professions. Chapters~\ref{ch:context} to~\ref{ch:deploy} describe the work carried out and its place in the plant's information flow: problem definition, data, methodology, results with interpretation, and the deployment prototype. Chapter~\ref{ch:discussion} analyses limits and lessons, and Chapter~\ref{ch:conclusion} concludes and lists future work.

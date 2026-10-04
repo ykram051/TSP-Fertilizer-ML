@@ -8,12 +8,18 @@ from pathlib import Path
 
 
 def main() -> int:
+    """Return 0 when the service published a fresh, non-failed health file."""
     path = Path(os.getenv("HEALTH_FILE", "/runtime/health.json"))
-    if not path.exists():
+    try:
+        maximum_age = float(os.getenv("HEALTH_MAX_AGE_SECONDS", "120"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        updated_at = datetime.fromisoformat(payload["updated_at"])
+    except (OSError, ValueError, KeyError, TypeError):
+        # Missing, unreadable or malformed health data means "not healthy".
         return 1
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    age = datetime.now(timezone.utc) - datetime.fromisoformat(payload["updated_at"])
-    if age.total_seconds() > 120:
+    if updated_at.tzinfo is None:
+        updated_at = updated_at.replace(tzinfo=timezone.utc)
+    if (datetime.now(timezone.utc) - updated_at).total_seconds() > maximum_age:
         return 1
     if payload.get("status") in {"DISCONNECTED", "DATA_ERROR"}:
         return 1

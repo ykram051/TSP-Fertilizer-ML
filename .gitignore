@@ -16,7 +16,7 @@ __pycache__/
 *.synctex.gz
 *.toc
 
-# Local render and QA output
+# Local render and QA outputa
 /tmp/
 
 # Local source data: do not publish plant data through Git
@@ -30,3 +30,19 @@ __pycache__/
 .DS_Store
 Thumbs.db
 *~
+
+# More LaTeX intermediates and local previews
+*.bbl
+*.blg
+*.lof
+*.lot
+*.xdv
+*.bcf
+*.run.xml
+final_internship_report/main_preview*.pdf
+final_internship_report/qa_pages/
+
+# Python tooling
+.pytest_cache/
+.venv/
+venv/

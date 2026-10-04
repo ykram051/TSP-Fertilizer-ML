@@ -54,3 +54,8 @@ CREATE INDEX IF NOT EXISTS idx_predictions_quality
     ON predictions(input_quality);
 CREATE INDEX IF NOT EXISTS idx_events_time
     ON service_events(event_time);
+-- The dashboard reads the newest run and then its latest N predictions.
+CREATE INDEX IF NOT EXISTS idx_predictions_run_order
+    ON predictions(run_id, prediction_id);
+CREATE INDEX IF NOT EXISTS idx_runs_started_at
+    ON service_runs(started_at);

@@ -1,16 +1,25 @@
 \clearpage
+
 \thispagestyle{empty}
+
 \vspace*{3cm}
+
 \begin{center}
-{\color{OcpBlue}\Huge\bfseries Machine Learning for TSP Free-Acid Monitoring\par}
-\vspace{1cm}
-{\Large Final-year engineering internship report\par}
+
 \vspace{1.5cm}
+
 \begin{minipage}{0.80\textwidth}
+
 \centering
-\textbf{Abstract.} This report documents a machine-learning project for estimating and forecasting \texttt{SLURRY\_FREE\_ACID} from one-minute TSP process data. It presents leakage-controlled feature engineering, target-anchored delta forecasting, target-free virtual sensing, stability-oriented model selection, and an advisory-only Docker and OPC UA replay prototype. The study covers one month of one-minute data and a laboratory replay environment; its natural continuation is multi-month validation and read-only shadow operation on the plant network.
+
+\textbf{Abstract.}
+
+This report documents a three-month machine-learning project carried out at OCP Group for monitoring and anticipating \texttt{SLURRY\_FREE\_ACID} in a TSP production process. The work addresses two complementary tasks: estimating the current free-acid value from process measurements when no recent laboratory result is available, and forecasting its short-term evolution when a recent target measurement can be used as an anchor. One month of one-minute historian data was analysed using a leakage-controlled and time-respecting methodology, including temporal and process features, chronological train/validation/test splits, persistence baselines, and stability analysis across expanding validation folds. A target-anchored delta model achieved a 19.8\%--34.9\% RMSE improvement over persistence for horizons of 1 to 15 minutes, while the target-free virtual sensor achieved an RMSE of 0.301 on the held-out period. The selected models were integrated into an advisory-only Docker and OPC UA replay prototype with data-quality checks, audit storage and a read-only monitoring dashboard. The prototype was evaluated in a laboratory replay environment; multi-month validation and read-only shadow operation on the plant network remain necessary before any operational use.
+
 \end{minipage}
+
 \vfill
-{\large Ikram Benfellah\par}
+
 \vspace*{2cm}
+
 \end{center}

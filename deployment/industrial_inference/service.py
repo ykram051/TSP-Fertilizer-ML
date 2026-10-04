@@ -41,6 +41,11 @@ class InferenceService:
             expected_cadence_seconds=service["cadence_seconds"],
             tolerance_seconds=service["cadence_tolerance_seconds"],
         )
+        if service["maximum_buffer_rows"] < self.runtime.minimum_rows:
+            raise ValueError(
+                f"service.maximum_buffer_rows ({service['maximum_buffer_rows']}) is smaller than "
+                f"the {self.runtime.minimum_rows} rows the model needs; no prediction could ever be made"
+            )
         self.shield = DataQualityShield(config, tags)
         self.queue: asyncio.Queue[int] = asyncio.Queue(maxsize=1000)
         self.health_path = Path(config["outputs"]["health_file"])
@@ -63,6 +68,29 @@ class InferenceService:
         self.heartbeat_count = 0
         self.last_snapshot_at: str | None = None
         self.last_prediction_at: str | None = None
+
+    def drain_queue(self) -> int:
+        """Discard notifications left over from a previous OPC session."""
+        discarded = 0
+        while True:
+            try:
+                self.queue.get_nowait()
+            except asyncio.QueueEmpty:
+                return discarded
+            self.queue.task_done()
+            discarded += 1
+
+    def close_audit_run(self, final_status: str) -> None:
+        """Record when a run ended; never let an audit error mask the real failure."""
+        if self.run_id is None:
+            return
+        try:
+            self.repository.finish_run(
+                self.run_id, datetime.now(timezone.utc).isoformat(), final_status
+            )
+        except Exception:
+            logging.exception("Could not close audit run %s", self.run_id)
+
     def start_audit_run(self) -> None:
         """Open a new audit/timeline segment after each OPC session is established.
 
@@ -334,6 +362,7 @@ class InferenceService:
         async with Client(url=endpoint) as client:
             # This laboratory reconnect starts a fresh consistency window.
             self.start_audit_run()
+            self.drain_queue()
             self.buffer.clear()
             self.last_processed_sequence = None
             self.health("CONNECTED", endpoint=endpoint, message="OPC UA session established")
@@ -346,7 +375,16 @@ class InferenceService:
             # the initial data-change notification is delivered before the handler
             # is fully registered on a freshly connected client.
             self.queue.put_nowait(int(await sequence.read_value()))
-            await self.process_sequences(client, sequence)
+            final_status = "STOPPED"
+            try:
+                await self.process_sequences(client, sequence)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                final_status = "DISCONNECTED"
+                raise
+            finally:
+                self.close_audit_run(final_status)
 
     async def run(self) -> None:
         delay = self.config["opc"]["reconnect_delay_seconds"]

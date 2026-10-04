@@ -54,6 +54,15 @@ class PredictionRepository:
                 ),
             )
 
+    def finish_run(self, run_id: str, stopped_at: str, final_status: str) -> None:
+        """Close an audit run once; a second call never overwrites the first."""
+        with closing(self.connect()) as connection, connection:
+            connection.execute(
+                """UPDATE service_runs SET stopped_at = ?, final_status = ?
+                   WHERE run_id = ? AND stopped_at IS NULL""",
+                (stopped_at, final_status, run_id),
+            )
+
     def add_prediction(self, run_id: str, prediction: dict[str, Any]) -> None:
         with closing(self.connect()) as connection, connection:
             connection.execute(
