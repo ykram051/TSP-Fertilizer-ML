@@ -1,22 +1,134 @@
-\chapter{Deployment Architecture}
-\section{Architecture and safety boundary}
-The implementation is a staged, advisory-only architecture. Figure~\ref{fig:deployment-architecture} summarizes the intended information path. Sensors and laboratory information are organized by PLC/DCS systems. Kepware is the intended industrial gateway: it communicates southbound with approved plant protocols and exposes configured tags northbound through OPC UA \cite{opcua}. The Python inference service reads those tags, prepares features and writes predictions to local audit storage and the dashboard. The optional advisory OPC namespace is disabled by default.
+\chapter{Deployment and Implementation}\label{ch:deploy}
 
-\begin{figure}[H]\centering
-\begin{tikzpicture}[node distance=4mm and 4mm,box/.style={draw=OcpGreen,rounded corners,fill=LightGray,minimum height=11mm,text width=2.35cm,align=center,font=\small},arr/.style={-{Latex[length=2mm]},thick,draw=OcpGreen}]
-\node[box](s){Sensors and laboratory result};
-\node[box,right=of s](p){PLC or DCS};
-\node[box,right=of p](k){Kepware and OPC UA};
-\node[box,right=of k](i){Docker inference service};
-\node[box,right=of i](d){SQLite and dashboard};
-\draw[arr](s) to (p); \draw[arr](p) to (k); \draw[arr](k) to (i); \draw[arr](i) to (d);
+\section{Architecture and safety boundary}
+The implementation is a staged, advisory-only architecture (Figure~\ref{fig:deployment-architecture}). Sensors and laboratory results are handled by the PLC/DCS layer; Kepware is the intended industrial gateway, communicating southbound with approved plant protocols and exposing configured tags northbound through OPC UA \citep{opcua}. A containerised Python service subscribes to these tags, builds features, predicts, and writes to a runtime volume holding the SQLite audit database and a health file. A native desktop dashboard on the host reads that volume read-only. The optional advisory OPC namespace is disabled by default (\var{advisory\_write\_enabled: false}).
+
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=3.5mm and 5mm,
+ bx/.style={draw=OcpGreen,rounded corners=2pt,fill=LightGray,minimum height=10mm,text width=2.05cm,align=center,font=\scriptsize},
+ hb/.style={draw=OcpBlue,rounded corners=2pt,fill=OcpBlue,text=white,minimum height=10mm,text width=2.05cm,align=center,font=\scriptsize},
+ zone/.style={draw=MidGray,dashed,rounded corners=3pt,inner sep=4mm},
+ arr/.style={-{Latex[length=1.8mm]},thick,draw=OcpGreen}]
+\node[bx](s){Sensors and laboratory result};
+\node[bx,right=of s](p){PLC or DCS};
+\node[bx,right=of p](k){Kepware and OPC UA server};
+\node[bx,below=7mm of k](q){Quality shield and rolling buffer};
+\node[bx,left=of q](f){Feature builder (178 features)};
+\node[bx,left=of f](m){Model (Ridge, clusters)};
+\node[hb,below=7mm of f](db){SQLite (WAL) and health.json};
+\node[hb,right=of db](d){PySide6 dashboard (read-only)};
+\draw[arr](s)--(p);\draw[arr](p)--(k);\draw[arr](k)--(q);\draw[arr](q)--(f);\draw[arr](f)--(m);
+\draw[arr](m.south)|-(db.west);\draw[arr](db)--(d);
+\begin{scope}[on background layer]
+\node[zone,fit=(s)(p)(k),label={[font=\scriptsize,text=OcpBlue]above:Plant side (OT)}]{};
+\node[zone,fit=(m)(f)(q)(db),label={[font=\scriptsize,text=OcpBlue]below:Docker host: inference service and runtime volume}]{};
+\end{scope}
 \end{tikzpicture}
-\caption{Advisory information flow implemented and planned for industrial integration.}\label{fig:deployment-architecture}
+\caption{Advisory information flow implemented (Stage 1) and planned for plant integration.}\label{fig:deployment-architecture}
 \end{figure}
 
-The model has no path to modify PLC/DCS setpoints, controller modes, interlocks, permissives, valve commands, pumps or safety logic. A service, network, database or dashboard failure must leave control independent. A real connection still requires approved endpoint details, certificates, security policy, Node IDs, firewall routes, quality semantics and IT/OT authorization. The repository uses placeholder mapping values for this purpose.
+The model has no path to PLC/DCS setpoints, controller modes, interlocks, permissives, valve or pump commands, or safety logic, and a service, network, database or dashboard failure leaves control unaffected. Plant integration follows the staged roadmap of Table~\ref{tab:stages}. The laboratory configuration runs on an isolated Docker network with OPC security disabled (\var{security\_mode: None}); the plant configuration uses the security profile of Table~\ref{tab:security}.
 
-\section{Containers, services and configuration}
-Docker Compose defines two services on an isolated bridge network: an OPC UA CSV-replay simulator and a Python inference service. Both use Python 3.11 slim images. The inference image installs required packages and \texttt{libgomp1} for the LightGBM runtime, runs a health check, and mounts configuration, model artifacts, schema and runtime output. Runtime settings, including mode, horizon, endpoint and advisory-write setting, can be supplied through environment variables. Node IDs are externalized in \texttt{opc\_tags.yaml}, not embedded in Python.
 
-SQLite is the authoritative Stage 1 audit store, with JSONL and latest-JSON mirrors for convenient inspection. It records service runs, predictions and status events. WAL mode permits a read-only dashboard to query history while the service writes. This is appropriate for a local demonstration with one writer; it is not claimed as a replacement for a plant historian, central retention policy or backup design.
+\section{Three-stage deployment roadmap}
+Deployment is organised in three stages whose exit criteria are explicit (Table~\ref{tab:stages}). Stage~1, the subject of this report, validates the software chain on replayed history; Stages~2 and~3 extend it to a laboratory gateway, then to read-only shadow operation and an advisory display. The OPC UA link itself is specified in Table~\ref{tab:security}: the inference service is the \emph{client} and Kepware (or the simulator) the \emph{server}, and the client subscribes to the sequence tag rather than polling every sensor.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Staged deployment roadmap.}\label{tab:stages}
+\begin{tabularx}{\textwidth}{L{0.14\textwidth}L{0.27\textwidth}Y}\toprule
+\thead\hd{Stage} & \hd{Environment} & \hd{Scope and exit criterion}\\\midrule
+1 & Docker, CSV replay through an OPC UA simulator & Tag mapping, subscriptions, snapshots, warm-up, quality policy, restart and reconnect, artifact loading, audit log (implemented)\\
+2 & Laboratory Kepware, then plant read-only shadow & Certificates, permissions, quality codes; predictions logged externally and compared with laboratory results; no effect on control\\
+3 & Advisory display (\var{TSP.ML\_Advisory} namespace) & Predicted value, change, generation and target time, model status, input quality and model version, labelled \emph{Advisory}\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{OPC UA security profile for plant connection.}\label{tab:security}
+\begin{tabularx}{\textwidth}{L{0.32\textwidth}Y}\toprule
+\thead\hd{Requirement} & \hd{Specification}\\\midrule
+Message security & \var{SignAndEncrypt} with trusted client and server certificates\\
+Authentication & Anonymous access disabled; dedicated least-privilege service identity\\
+Permissions & Read-only on plant input tags; writes only to a dedicated advisory namespace\\
+Network & Firewall rule limited to the inference host and the approved OPC endpoint\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Containers, configuration and storage}
+Docker Compose defines two services on an isolated bridge network: an OPC UA CSV-replay simulator and the inference service, both on Python 3.11 slim images. The inference image installs \texttt{libgomp1} for LightGBM, defines a health check and mounts configuration, model artifacts, schema and runtime output. Settings can be overridden through environment variables, and Node IDs live in \texttt{opc\_tags.yaml}, not in code. Table~\ref{tab:config} gives the main parameters.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Main runtime parameters of the inference service (\texttt{service.yaml}).}\label{tab:config}
+\begin{tabularx}{\textwidth}{L{0.40\textwidth}L{0.17\textwidth}Y}\toprule
+\thead\hd{Parameter} & \hd{Value} & \hd{Role}\\\midrule
+\var{cadence\_seconds} (tolerance) & 60 (5) & Expected source cadence and allowed jitter\\
+\var{maximum\_buffer\_rows} & 180 & Rolling history kept in memory\\
+\var{heartbeat\_interval\_seconds} & 5 & Health refresh, even without new data\\
+\var{subscription\_period\_ms} & 100 & OPC UA subscription period\\
+\var{maximum\_missing\_required\_share} & 0.25 & Above this share, the snapshot is rejected\\
+\var{maximum\_age\_minutes} (lab target) & 120 & Freshness limit for anchored mode\\\bottomrule
+\end{tabularx}
+\end{table}
+
+SQLite is the authoritative Stage~1 audit store, with JSONL and latest-JSON mirrors for inspection. It is opened in WAL mode with foreign keys and a 10-second busy timeout, so a read-only dashboard can query history while the service writes. Three tables (Table~\ref{tab:schema}) make every output traceable to a run and a source timestamp; \texttt{UNIQUE(run\_id, sequence)} prevents duplicate predictions. This suits a one-writer laboratory demonstration and is not a replacement for a plant historian, retention policy or backup design.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{SQLite data model.}\label{tab:schema}
+\begin{tabularx}{\textwidth}{L{0.20\textwidth}Y}\toprule
+\thead\hd{Table} & \hd{Main columns}\\\midrule
+\var{service\_runs} & \var{run\_id}, model version, mode, horizon, start/stop times, configuration snapshot (JSON)\\
+\var{predictions} & \var{run\_id}, \var{sequence}, source and prediction timestamps, predicted value, predicted change, input quality, imputed inputs, assigned statistical cluster\\
+\var{service\_events} & status transitions with time, sequence, message and details\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Streaming pipeline and quality controls}\label{sec:pipeline}
+Stage 1 replays the confidential CSV without plant access: the simulator publishes each row as OPC UA tags, sets the source timestamp and then writes a sequence number as a commit marker; it can refresh the simulated laboratory target every 60 rows. The service avoids mixed snapshots with a \emph{sequence-read-sequence} protocol: it reads the sequence, then all input tags, then the sequence again, and accepts the row only if both sequence values agree.
+
+Accepted snapshots pass the quality shield (Table~\ref{tab:quality}). Isolated missing cells are tagged \texttt{IMPUTED} and handled by the saved training-fitted imputer and missingness indicators; nothing is ever fitted during live inference. The rolling buffer additionally refuses non-monotonic timestamps and clears its history when a source gap exceeds cadence plus tolerance (65 s), because rolling features must not silently bridge a gap.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Data-quality rules applied to every snapshot.}\label{tab:quality}
+\begin{tabularx}{\textwidth}{L{0.30\textwidth}YL{0.18\textwidth}}\toprule
+\thead\hd{Rule} & \hd{Condition} & \hd{Outcome}\\\midrule
+Missing inputs & $\le25\%$ of required tags missing & accepted, \texttt{IMPUTED}\\
+Missing inputs & $>25\%$ missing & \texttt{DATA\_ERROR}\\
+OPC quality & any required tag bad or uncertain & \texttt{DATA\_ERROR}\\
+Engineering limits & value outside configured minimum or maximum & \texttt{DATA\_ERROR}\\
+Chronology & non-monotonic timestamp or gap $>65$ s & rejected or buffer reset\\
+Laboratory target & missing, future-dated or older than 120 min (anchored mode) & \texttt{DATA\_ERROR}\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Warm-up and operating modes}
+The maximum feature lookback is 30 minutes, so a cold start needs the current row plus 30 previous rows: 31 accepted rows before the first valid prediction. Until then the service reports \texttt{WARMING\_UP} and does not fabricate history; historian backfill would be the production improvement. In \texttt{target\_free} mode the service estimates the current value from process signals. In \texttt{target\_anchored} mode it requires the current laboratory value with its timestamp and produces 1-, 5-, 10- or 15-minute delta forecasts, which protects it from treating an outdated laboratory result as a live analyser.
+
+\subsection{Processing sequence}
+Each minute the service executes the following steps; the complete flow is summarised in Figure~\ref{fig:sequence}.
+\begin{enumerate}
+\item Receive the sequence notification and read sequence, mapped inputs and sequence again.
+\item Apply the quality shield (Table~\ref{tab:quality}); isolated gaps become \texttt{IMPUTED}.
+\item Append the accepted row to the chronological buffer; publish \texttt{WARMING\_UP} until 31 rows exist.
+\item Build the feature columns expected by the saved artifact and apply the training-fitted preprocessing, never refitting live.
+\item Run \texttt{target\_free} estimation or the configured \texttt{target\_anchored} forecast.
+\item Commit the record to SQLite in one transaction, then mirror it to JSONL and latest-JSON files.
+\end{enumerate}
+
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=3mm and 4mm,
+ bx/.style={draw=OcpGreen,rounded corners=2pt,fill=LightGray,minimum height=9mm,text width=2.2cm,align=center,font=\scriptsize},
+ dc/.style={draw=Amber,rounded corners=2pt,fill=white,minimum height=9mm,text width=2.2cm,align=center,font=\scriptsize},
+ arr/.style={-{Latex[length=1.8mm]},thick,draw=OcpGreen}]
+\node[bx](a){Coherent snapshot};
+\node[bx,right=of a](b){Quality shield};
+\node[dc,right=of b](c){History $\ge31$ rows?};
+\node[bx,right=of c](d){Features + saved preprocessing};
+\node[bx,below=7mm of d](e){Model (target-free or anchored)};
+\node[bx,left=of e](f){SQLite transaction};
+\node[bx,left=of f](g){JSONL + latest JSON};
+\node[dc,above=7mm of b](h){Status event (rejected / warming)};
+\draw[arr](a)--(b);\draw[arr](b)--(c);\draw[arr](c)--node[above,font=\tiny]{yes}(d);\draw[arr](d)--(e);\draw[arr](e)--(f);\draw[arr](f)--(g);
+\draw[arr](b.north)--(h.south);\draw[arr](c.north)|-node[pos=0.2,right,font=\tiny]{no}(h.east);
+\end{tikzpicture}
+\caption{One-minute processing flow of the inference service.}\label{fig:sequence}
+\end{figure}

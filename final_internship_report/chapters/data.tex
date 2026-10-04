@@ -1,35 +1,114 @@
-\chapter{Data Understanding and Preparation}
+\chapter{Data Understanding and Preparation}\label{ch:data}
+
 \section{Data source and scope}
-The notebooks use a confidential historian export named \texttt{tsp\_1min.csv}. The raw file is intentionally absent from the repository, but generated audit artifacts record 44,640 one-minute rows from 1 to 31 January 2026. It contains 21 numeric process measurements and the target. There are 308 missing target values. Data were sorted by the \texttt{Date} timestamp, and all evaluation splits preserve chronology.
+The notebooks use a confidential historian export named \texttt{tsp\_1min.csv}, absent from the repository. The generated audit artifacts record 44,640 one-minute rows from 1 to 31 January 2026, 21 numeric process measurements and the target, with 308 missing target values. Rows are sorted by the \texttt{Date} timestamp and every split preserves chronology (Table~\ref{tab:splits}).
 
-\section{Variables and measurement semantics}
-Table~\ref{tab:variables} summarizes the principal variable families. Descriptions are taken from the variable registry, which marks several units and physical interpretations as provisional. The report consequently uses these signals as documented measurements rather than asserting unverified chemical or control meanings.
-
-\begin{table}[H]\centering
-\caption{Principal input families in the feature registry.}\label{tab:variables}
-\small\begin{tabularx}{\textwidth}{L{0.28\textwidth}Y L{0.24\textwidth}}\toprule
-\textbf{Family} & \textbf{Examples} & \textbf{Registry status}\\\midrule
-Production and flows & Production balance, acid lines, ground phosphate, slurry, fuel, wash liquid, steam, recycle & Several units and controllability claims require confirmation\\
-Thermal measurements & Steam, attack tank, passage tank, slurry, dryer outlet, hot air and brick temperatures & Temperature names are documented; location or units may remain pending\\
-Pressure and state & Steam pressure, dryer depression, passage-tank level &  Units confirmed\\
-Target & \texttt{SLURRY\_FREE\_ACID} & Laboratory or quality measurement, forbidden from target-free inputs\\\bottomrule
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Chronological split for the 1-minute horizon (rows and time span, UTC).}\label{tab:splits}
+\begin{tabularx}{\textwidth}{L{0.22\textwidth}R{0.12\textwidth}YY}\toprule
+\thead\hd{Split} & \hd{Rows} & \hd{Start} & \hd{End}\\\midrule
+Train (70\%) & 31,011 & 2026-01-01 00:30 & 2026-01-22 17:17\\
+Validation (15\%) & 6,645 & 2026-01-22 17:18 & 2026-01-27 08:58\\
+Test (15\%) & 6,646 & 2026-01-27 08:59 & 2026-01-31 23:58\\\bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Data quality and preprocessing}
-The exploratory notebook examined timestamp order, cadence, duplicates, missingness, descriptive statistics, target extremes, correlations and time evolution. The target had 308 missing values and showed unusually extreme observations. For example, the observed minimum and maximum were 3.392 and 52.671, while the central distribution was concentrated near 11.3. These observations motivated diagnostics and conservative preprocessing, not automatic removal of all unusual values.
+\section{Variables and measurement semantics}
+The 21 inputs fall into flows (acid lines, ground phosphate, slurry, fuel oil, wash liquid, steam), thermal measurements (steam, attack tank, passage tank, sprayer, dryer outlet gas, hot air, brick), pressure and state signals (steam pressure, dryer depression, passage-tank level), and a recycle and production indicator. The variable registry (Appendix~\ref{app:evidence}) assigns each signal a role: \emph{observed state}, \emph{candidate actuator} (a flow, pressure or fuel setting that an operator may influence) or \emph{uncertain role} (the recycle stream). The two slurry volumetric flows are expressed in m\textsuperscript{3}/h. All other signals are modelled on a standardised scale, so that Ridge regression and tree ensembles are insensitive to the unit in which a tag is expressed; derived quantities are used as engineered indicators rather than as strict physical balances.
 
-The structural warm-up removes the first 30 rows because required lagged and rolling history does not exist. Later isolated sensor gaps remain part of the chronology. The pipeline adds missingness indicators and uses training-fitted median imputation. Process-derived values use an $\epsilon=10^{-6}$ denominator guard, replace infinities with missing values, and are clipped to training-period 0.1\textsuperscript{th} and 99.9\textsuperscript{th} percentiles. These rules prevent unstable ratios from dominating a model while avoiding validation or test fitting.
 
-\section{Feature engineering}
-For each process source, accepted temporal features include current value, selected lags, 10- and 30-minute rolling means, a 10-minute rolling standard deviation, a five-minute difference and a 10-minute rolling slope. Lags were selected from 1, 5, 10, 15, 30 and 60 minutes using training-only association, mutual information, stability across chronological blocks and a limited process-response prior. At most three lags were retained per source.
+\section{Exploratory data analysis}\label{sec:eda}
+\subsection{Structure and completeness}
+The extract contains 44,640 rows and 23 columns with no duplicated row or timestamp, which allows each row to be read as one distinct operating state. Missing values are rare (below 1\% for every variable, Table~\ref{tab:missing}), so rows were not dropped; instead missingness is encoded explicitly (Section~\ref{sec:prep}).
 
-The implementation also creates total acid flow, acid-flow imbalance, acid-to-phosphate ratio, total slurry volumetric flow, a slurry-density proxy, thermal gradients, a steam-condition proxy, drying and recycle proxies, and selected flow coefficients of variation. Only the two slurry volumetric components are confirmed additive in the registry. The other derived relationships are explicitly treated as proxies.
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Variables with the most missing values (out of 44,640 rows).}\label{tab:missing}
+\begin{tabularx}{\textwidth}{YR{0.18\textwidth}R{0.18\textwidth}}\toprule
+\thead\hd{Variable} & \hd{Missing rows} & \hd{Share (\%)}\\\midrule
+\var{DEPRESSURE\_SECHEUR} & 444 & 0.995\\
+\var{FLOW\_RATE\_FIOUL} & 414 & 0.927\\
+\var{FLOW\_RATE\_VAPEUR} & 396 & 0.887\\
+\var{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & 393 & 0.880\\
+\var{SLURRY\_FREE\_ACID} (target) & 308 & 0.690\\\bottomrule
+\end{tabularx}
+\end{table}
 
-\begin{figure}[H]
+\subsection{Distribution of the target}
+The target is tightly controlled around 11.3 with rare excursions (Table~\ref{tab:target}). The 99\textsuperscript{th} percentile is 12.31, whereas the maximum reaches 52.67, giving a skewness of 12.1 and a kurtosis of 959. The Tukey fences $[Q_1-1.5\,\mathrm{IQR},\,Q_3+1.5\,\mathrm{IQR}]=[10.05,\,12.56]$ flag 352 rows, which occur both as isolated spikes (for instance 52.671 on 18 January, 25.964 on 19 January) and as continuous low-acid windows of 15 to 28 minutes (for example 28 January, 22:18--22:45, with values between 8.66 and 10.00). Because the distribution is heavy-tailed, the evaluation reports both MAE and RMSE and analyses extreme periods separately (Section~\ref{sec:regimes}); no target value is deleted automatically.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Descriptive statistics of \var{SLURRY\_FREE\_ACID} (44,332 valid observations).}\label{tab:target}
+\begin{tabular}{lrlr}\toprule
+\thead\hd{Statistic} & \hd{Value} & \hd{Statistic} & \hd{Value}\\\midrule
+Mean & 11.298 & 95\textsuperscript{th} percentile & 12.012\\
+Median & 11.311 & 99\textsuperscript{th} percentile & 12.308\\
+Standard deviation & 0.515 & Minimum & 3.392\\
+1\textsuperscript{st} percentile & 10.225 & Maximum & 52.671\\
+25\textsuperscript{th} percentile & 10.992 & Skewness & 12.08\\
+75\textsuperscript{th} percentile & 11.620 & Kurtosis & 959.0\\\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Relationship with the process variables}
+Linear association with the target is moderate and uniformly positive (Table~\ref{tab:corr}): no single signal exceeds a correlation of 0.37. Fuel-oil flow, steam flow, recycle, slurry flow and production load all rise with the free acid, which points to an interaction between feed intensity, heat load and internal circulation rather than to a single dominant driver. This observation motivated feature families that combine sources (ratios, gradients) instead of relying on raw values. Correlation is used for screening only.
+
+Shifting a signal by a few minutes slightly increases its correlation (Table~\ref{tab:corr}): the best lag is 1 to 5 minutes for most flows and 10 minutes for steam pressure and ground-phosphate flow. The gains are small, so no single dead time exists; the model therefore receives several lags and rolling statistics rather than one delayed copy (Section~\ref{sec:features}).
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Strongest Pearson correlations with the target and best lag.}\label{tab:corr}
+\begin{tabularx}{\textwidth}{YR{0.17\textwidth}R{0.16\textwidth}R{0.17\textwidth}}\toprule
+\thead\hd{Variable} & \hd{$r$ (lag 0)} & \hd{Best lag (min)} & \hd{$r$ (best lag)}\\\midrule
+\var{FLOW\_RATE\_FIOUL} & 0.364 & 1 & 0.356\\
+\var{FLOW\_RATE\_VAPEUR} & 0.359 & 3 & 0.361\\
+\var{RECYCLAGE} & 0.356 & 5 & 0.360\\
+\var{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & 0.346 & 1 & 0.353\\
+\var{PRODUCTION\_TSP\_BALANCE} & 0.339 & 2 & 0.340\\
+\var{PRESSURE\_VAPEUR} & 0.323 & 10 & 0.327\\
+\var{FLOW\_RATE\_GROUND\_PHOSPHATE} & 0.319 & 10 & 0.324\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Physical plausibility}
+Several flow signals take small negative values (475 for steam flow, 451 for fuel oil, 420 for slurry volume, 354 for the production balance), consistent with noise around zero during low-flow or stopped conditions, whereas 4,861 negative values of the dryer depression follow the draft sign convention. A single universal rule would therefore be wrong; the pipeline keeps the values, adds a missingness indicator and relies on percentile clipping of derived features.
+
+\section{Data quality and preprocessing}\label{sec:prep}
+The findings of Section~\ref{sec:eda} translate into conservative rules. All fitted preprocessing is learned on the training period only. The first 30 rows are removed because the longest lookback is 30 minutes. Missing cells receive a missingness indicator and a training-median imputation. Derived ratios use the guarded form
+\begin{equation}\label{eq:ratio}
+r(a,b)=\frac{a}{b+\operatorname{sgn}(b)\,\epsilon}\ \text{ if }|b|>\epsilon,\ \text{ otherwise missing},\qquad \epsilon=10^{-6},
+\end{equation}
+infinities are replaced by missing values, and process-derived features are clipped to the training 0.1\textsuperscript{th} and 99.9\textsuperscript{th} percentiles. Together these rules stop unstable ratios from dominating a model without fitting anything on validation or test data.
+
+\section{Feature engineering}\label{sec:features}
+For each source $x$ and time $t$, the accepted temporal features are the current value, selected lags $x_{t-\ell}$, rolling means over $w\in\{10,30\}$ minutes, a 10-minute rolling standard deviation, a five-minute difference $x_t-x_{t-5}$, and the least-squares slope over the last 10 samples,
+\begin{equation}\label{eq:slope}
+b_t=\frac{\sum_{k=0}^{9}(k-4.5)\,\bigl(x_{t-9+k}-\bar x_{t}^{(10)}\bigr)}{\sum_{k=0}^{9}(k-4.5)^2},
+\end{equation}
+which is set to missing if the window contains a missing value. Lags were chosen among $\{1,5,10,15,30,60\}$ minutes from training-only correlation, mutual information, stability across chronological blocks and a limited process-response prior, keeping at most three lags per source; 20 of the 21 sources retained lags 1, 5 and 10.
+
+Process-aware features add total acid flow, acid-flow imbalance $|F_{A1}-F_{A2}|$, the acid-to-phosphate ratio, total slurry volumetric flow, a slurry-density proxy $F^{t/h}_{\text{slurry}}/F^{m^3/h}_{\text{slurry}}$, temperature gradients (attack minus passage tank, hot air minus dryer outlet gas, steam minus sprayer slurry), a steam-energy proxy $P_{\text{steam}}T_{\text{steam}}$, a drying-intensity proxy, a recycle-to-production ratio and five 10-minute flow coefficients of variation $\sigma_{10}/(|\mu_{10}|+\epsilon)$. Only the two slurry volumetric flows are confirmed additive; every other relation is a proxy.
+
+\begin{figure}[!htbp]
 \centering
-\makebox[\textwidth][c]{\includegraphics[width=1.3\textwidth]{feature_preparation_artifacts/figures/pipeline_overview.png}}
+\includegraphics[width=\textwidth]{feature_preparation_artifacts/figures/pipeline_overview.png}
 \caption{Leakage-controlled feature-preparation pipeline generated by Notebook 02.}\label{fig:feature-pipeline}
 \end{figure}
 
-Figure~\ref{fig:feature-pipeline} shows the feature flow. Four hypotheses were tested: 21 raw variables, 162 retained temporal features, 58 process-aware features, and 178 full features after correlation filtering. Filtering was performed within source families using training-only absolute correlation above 0.98, while protected process-aware features and missingness indicators were retained.
+Four hypotheses were tested (Table~\ref{tab:featuresets}, Figure~\ref{fig:feature-pipeline}). Correlation filtering removed 48 temporal features whose training-only absolute correlation within a source family exceeded 0.98, while protected process-aware features and missingness indicators were retained.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Feature sets compared (counts are identical for all horizons).}\label{tab:featuresets}
+\begin{tabularx}{\textwidth}{L{0.16\textwidth}YR{0.13\textwidth}R{0.13\textwidth}R{0.14\textwidth}}\toprule
+\thead\hd{Set} & \hd{Hypothesis tested} & \hd{Candidates} & \hd{Retained} & \hd{Missing flags}\\\midrule
+A raw & Current state alone is sufficient & 21 & 21 & 0\\
+B temporal & Lags and recent dynamics help & 210 & 162 & 21\\
+C process & Physical relations help & 58 & 58 & 21\\
+D full & Both are complementary & 226 & 178 & 21\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[!htbp]\centering
+\includegraphics[width=0.75\textwidth]{feature_preparation_artifacts/figures/selected_lag_distribution.png}
+\caption{Distribution of the lags retained by the training-only selection procedure.}\label{fig:lags}
+\end{figure}
+
+Figure~\ref{fig:lags} confirms that short lags (1, 5 and 10 minutes) dominate the selection, in agreement with the lag analysis of Table~\ref{tab:corr}; the 15-minute lag appears for a single source (the attack-tank temperature) and the 30- and 60-minute lags are never retained.

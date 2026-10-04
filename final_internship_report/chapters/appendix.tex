@@ -1,9 +1,32 @@
-\chapter{Evidence and Deployment Scope}
-\section{Notebook and implementation evidence}
-The report is based on the repository notebooks \texttt{01} through \texttt{08}, their generated CSV artifacts, the existing technical reports, and the deployment source code. The following progression was retained: exploratory analysis, prepared feature sets, direct benchmark, delta and transition analysis, target-free virtual sensing, robust candidate comparison, global and local hybrid research and JITL research. The source artifacts remain the detailed audit record for all rows, folds, coefficients, predictions and configuration values summarized here.
+\titleformat{\chapter}[hang]{\bfseries\color{OcpBlue}\huge}{Appendix \thechapter}{0.55em}{}
+  [\vspace{1pt}{\color{OcpGreen}\titlerule[1.4pt]}]
+\chapter{Evidence and Deployment Scope}\label{app:evidence}
+\section{Sources of evidence}
+The report is based on notebooks 01 to 08 of the repository, their generated CSV artifacts, the existing technical reports and the deployment source code. The artifacts remain the detailed audit record for all rows, folds, coefficients, predictions and configuration values summarised here.
 
-\section{Terms that require supervisor confirmation}
-Before production shadow mode, the following repository items require owner validation: exact engineering units and material basis for several flow and thermal signals; recycle stream meaning; correspondence between slurry mass and combined volumetric streams; actual event labels; source timestamp and freshness policy for laboratory free acid; DCS vendor and endpoint; Node IDs; OPC UA certificates and security policy; network route; retention and access policy; and the decision cost of errors and warnings.
+\section{Variable registry}
+Table~\ref{tab:registry} lists the 22 registered variables. The two slurry volumetric flows are expressed in m\textsuperscript{3}/h and all other signals are standardised before modelling; the role column follows the registry classification.
 
-\section{Software verification scope}
-The deployment repository includes unit tests for storage, quality checks, buffer chronology, configuration, resilience and dashboard data access. These checks exercise software behavior. They do not validate the chemical process, sensor calibration, industrial cybersecurity, plant availability, or the business usefulness of an advisory prediction.
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Variable registry (target in the last row).}\label{tab:registry}
+\begin{tabularx}{\textwidth}{L{0.47\textwidth}L{0.14\textwidth}Y}\toprule
+\thead\hd{Variable} & \hd{Category} & \hd{Role}\\\midrule
+\var{FLOW\_RATE\_PHOSPHORIC\_ACID\_1}, \var{\_2} & flow & candidate actuator\\
+\var{FLOW\_RATE\_GROUND\_PHOSPHATE} & flow & candidate actuator\\
+\var{FLOW\_RATE\_FIOUL}, \var{\_LIQUIDE\_LAVAGE}, \var{\_VAPEUR} & flow & candidate actuator\\
+\var{PRESSURE\_VAPEUR} & pressure & candidate actuator\\
+\var{RECYCLAGE} & production & uncertain role\\
+\var{PRODUCTION\_TSP\_BALANCE} & production & observed state\\
+\var{FLOW\_RATE\_SLURRY\_T\_PER\_HR} & flow & observed state\\
+\var{FLOW\_RATE\_SLURRY\_M3\_HR}, \var{\_M3\_HR\_2} & flow & observed state (m\textsuperscript{3}/h)\\
+\var{TEMPERATURE\_VAPEUR}, \var{\_CUVE\_ATTAQUE}, \var{\_CUVE\_DE\_PASSAGE} & thermal & observed state\\
+\var{TEMPERATURE\_SLURRY\_PULVERISATEUR}, \var{\_AIR\_CHAUD} & thermal & observed state\\
+\var{TEMPERATURE\_GAZ\_SORTIE\_SECHEUR}, \var{\_BRIQUE} & thermal & observed state\\
+\var{DEPRESSURE\_SECHEUR} & pressure & observed state\\
+\var{LEVEL\_CUVE\_PASSAGE} & level & observed state\\
+\var{SLURRY\_FREE\_ACID} & quality & target, never an input\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Software verification and reproducibility}
+The repository provides a pinned \texttt{requirements.txt}, two Docker images (simulator and inference service) with an explicit \texttt{import lightgbm} smoke test at image build, a launcher script, a PyInstaller build of the dashboard and a ZIP packaging script. Six unit-test modules (buffer, configuration, quality shield, storage, service resilience, dashboard data access) cover 19 test functions. All saved artifacts used at runtime (feature registry, lag table, clipping bounds, model bundles) are versioned with the code, and every prediction records the model version and run identifier in the audit database.

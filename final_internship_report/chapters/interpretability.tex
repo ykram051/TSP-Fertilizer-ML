@@ -1,13 +1,16 @@
-\chapter{Model Interpretability}
-The project did not run SHAP analysis. The notebooks state this explicitly and instead use model-agnostic permutation importance, grouped source and feature-family importance, Ridge coefficient inspection, and importance-stability diagnostics. This is a useful methodological distinction because it avoids claiming a SHAP result that was never generated.
+\section{Model interpretability}\label{sec:interp}
+No SHAP analysis was run; the notebooks use model-agnostic permutation importance (increase in validation mean squared error when a feature is shuffled), grouped importance by feature family, Ridge coefficients and importance-stability diagnostics, which is consistent with the known pitfalls of such methods \citep{molnar2020interpretability,fisher2019mcr}. Table~\ref{tab:importance} lists the most influential inputs of the target-free Ridge benchmark model.
 
-Permutation importance measures the deterioration in prediction performance when a feature is disrupted. Ridge coefficients describe the fitted linear contribution after scaling. Neither method establishes process causality, controllability, or a safe intervention, a general limitation of model-agnostic explanation methods \cite{molnar2020interpretability}. In this project, importance was used to check whether feature families and accepted process variables contributed predictive association, and to guide discussions with process engineers.
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Largest permutation importances, target-free benchmark on the full feature set.}\label{tab:importance}
+\begin{tabularx}{\textwidth}{L{0.08\textwidth}YL{0.20\textwidth}R{0.17\textwidth}}\toprule
+\thead\hd{Rank} & \hd{Feature} & \hd{Family} & \hd{MSE increase}\\\midrule
+1 & \var{FLOW\_RATE\_PHOSPHORIC\_ACID\_2} & raw & 0.805\\
+2 & \var{FLOW\_RATE\_PHOSPHORIC\_ACID\_1} & raw & 0.401\\
+3 & \var{PRESSURE\_VAPEUR} & raw & 0.150\\
+4 & \var{STEAM\_ENERGY\_PROXY} & process-aware & 0.127\\
+5 & \var{RECYCLAGE} & raw & 0.082\\\bottomrule
+\end{tabularx}
+\end{table}
 
-The dashboard and notebooks also inspect candidate transitions using a multivariate normalized process-change score. The score is a diagnostic of joint sensor movement. It is not target change, an identified startup or shutdown, a causal attribution, or a model output. This distinction is important because the available data does not include validated event labels.
-
-Figure~\ref{fig:importance} presents the existing benchmark interpretation material. It should be read together with the feature registry: some variables have provisional units, uncertain stream meanings, or unconfirmed controllability. The correct use of this analysis is to prioritize validation questions, not to recommend changing a process variable.
-
-\begin{figure}[H]\centering
-\includegraphics[width=\textwidth]{prediction_benchmark_artifacts/figures/grouped_importance_and_horizon_stability.png}
-\caption{Grouped predictive importance and horizon stability from the direct-benchmark analysis.}\label{fig:importance}
-\end{figure}
+By family, raw sensors account for most of the importance (1.77), followed by temporal features (0.28) and process-aware features (0.13); missingness indicators contribute nothing. The two acid flows dominate, which agrees with the chemistry of an acid attack on rock, but the result describes predictive association. It identifies which signals carry information about the free acid and is used to check that the model relies on plausible process drivers (acid feeds, steam and recycle), not to recommend changing a variable. The same caution applies to the multivariate normalised process-change score used in the notebooks and dashboard: it measures joint sensor movement, not target change, a confirmed startup or shutdown, or a model output.

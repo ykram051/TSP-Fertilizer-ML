@@ -1,24 +1,57 @@
-\chapter{Machine Learning Methodology}
-\section{Problem formulation}
-Let $x_t$ denote the process information available at minute $t$ and $y_t$ the free-acid measurement. Direct forecasting learns $f_h(x_{\leq t})\approx y_{t+h}$ for horizons $h\in\{1,5,10,15\}$ minutes. Because a current observed level is very persistent over short periods, the project also evaluated delta forecasting:
-\begin{equation}\label{eq:delta}
-\Delta y_{t,h}=y_{t+h}-y_t,\qquad \hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h}.
-\end{equation}
-Equation~\ref{eq:delta} focuses the model on future movement rather than reproducing a known current level. It is valid only when the laboratory target is available and fresh. Target-free virtual sensing instead learns $g(x_{\leq t})\approx y_t$ without any current or historical target feature.
+\chapter{Machine Learning Methodology}\label{ch:method}
 
-Performance is reported with MAE and RMSE:
-\begin{equation}
-\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat y_i|,\qquad
-\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat y_i)^2}.
+\section{Problem formulation and metrics}
+Direct forecasting learns $f_h(x_{\le t})\approx y_{t+h}$. Because a measured level is very persistent over minutes, the project also evaluates delta forecasting,
+\begin{equation}\label{eq:delta}
+\Delta y_{t,h}=y_{t+h}-y_t,\qquad \hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h},
 \end{equation}
-RMSE gives additional weight to larger errors, which is useful for identifying unstable periods, while MAE is readily interpretable as average absolute deviation.
+which concentrates the model on future \emph{movement} and is valid only when the laboratory value is fresh. Target-free virtual sensing learns $g(x_{\le t})\approx y_t$ without any current, past or future target feature.
+
+Errors are reported with MAE, RMSE and $R^2$. Forecasts are compared with the operational persistence baseline $\hat y_{t+h}=y_t$ through the relative RMSE improvement
+\begin{equation}\label{eq:improvement}
+I_h=100\Bigl(1-\frac{\mathrm{RMSE}_{\text{model}}}{\mathrm{RMSE}_{\text{persistence}}}\Bigr),
+\end{equation}
+which is negative when the model is worse than persistence. RMSE weighs large errors more and highlights unstable periods; MAE is directly readable as an average deviation.
 
 \section{Chronological validation}
-The baseline split is the first 70\% for training, the next 15\% for validation and the final 15\% for test. Random shuffling was not used because adjacent one-minute samples are dependent and could make near-identical states appear in training and test. Preprocessing, lag selection, clipping limits, correlation filtering, hyperparameters and blend weights were learned without test fitting.
+The baseline split is 70\%/15\%/15\% in time order (Table~\ref{tab:splits}); shuffling is excluded because adjacent minutes are nearly identical states and would leak into the test set \citep{bergmeir2018forecasting}. Lag selection, clipping bounds, correlation filtering, hyperparameters and blend weights were learned without test data. Stability research then used four expanding blocks of 1,657 validation rows each (Table~\ref{tab:folds}); within each fold, imputation, scaling, clustering and local experts are fitted on the preceding rows only, giving a distribution of errors rather than a single number.
 
-Later stability work used four expanding chronological blocks. For each fold, imputation, scaling, clustering and local experts were fitted on the preceding rows only. This produces a distribution of fold errors rather than a single validation number, allowing mean performance, variability and worst-block behaviour to influence selection.
+\begin{figure}[!htbp]\centering
+\includegraphics[width=0.95\textwidth]{feature_preparation_artifacts/figures/split_timeline.png}
+\caption{Chronological train/validation/test partition of the January series.}\label{fig:split}
+\end{figure}
 
-\section{Models investigated}
-Ridge regression was retained as a regularized linear reference for correlated engineered features \cite{hoerl1970ridge}. Extra Trees and Histogram Gradient Boosting were used in the direct benchmark to test nonlinear interactions. The target-free study additionally considered PLS \cite{wold2001pls}, KNN, XGBoost or LightGBM \cite{ke2017lightgbm} where available, and validation-weighted blends. The final Notebook 05 target-free baseline was a 50/50 Ridge-LightGBM blend. Chronological validation follows the need to respect serial dependence in time-series evaluation \cite{bergmeir2018forecasting}.
+Figure~\ref{fig:split} shows the partition; the validation and test periods always follow the training period in time.
 
-The robustness notebooks compared global blends, KMeans-partitioned local Ridge experts, a global/local hybrid and JITL variants using PCA or PLS representation with nearest neighbours. KMeans clusters are statistical feature-space groups, not confirmed operating regimes. JITL did not produce a selection improvement over the global blend.
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Expanding chronological folds used for stability analysis (UTC).}\label{tab:folds}
+\begin{tabularx}{\textwidth}{L{0.08\textwidth}R{0.15\textwidth}Y}\toprule
+\thead\hd{Fold} & \hd{Train rows} & \hd{Validation block}\\\midrule
+1 & 30,940 & 2026-01-22 17:18 to 2026-01-23 21:08\\
+2 & 32,597 & 2026-01-23 21:09 to 2026-01-25 00:49\\
+3 & 34,254 & 2026-01-25 00:50 to 2026-01-26 04:30\\
+4 & 35,911 & 2026-01-26 04:31 to 2026-01-27 08:58\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Models and tuning}
+Ridge regression, $\hat\beta=\arg\min_\beta\lVert y-X\beta\rVert_2^2+\alpha\lVert\beta\rVert_2^2$ on standardised features, is the regularised linear reference for correlated engineered features \citep{hoerl1970ridge}. Extra Trees \citep{geurts2006extratrees} and histogram gradient boosting test nonlinear interactions; the target-free study adds PLS \citep{wold2001pls}, KNN, XGBoost, LightGBM \citep{ke2017lightgbm} and validation-weighted blends. Each family received a small, comparable search budget (two candidates per model, Table~\ref{tab:hyper}); the validation split selects the candidate.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Search space of the target-free benchmark (Notebook 05).}\label{tab:hyper}
+\begin{tabularx}{\textwidth}{L{0.20\textwidth}YY}\toprule
+\thead\hd{Model} & \hd{Candidate 1} & \hd{Candidate 2}\\\midrule
+Ridge & $\alpha=1$ & $\alpha=10$\\
+PLS & 5 components & 10 components\\
+KNN & $k=25$, distance weights & $k=75$, distance weights\\
+Extra Trees & 60 trees, leaf 2, features 0.8 & 60 trees, leaf 5, features 0.7\\
+Hist. gradient boosting & 80 iter., rate 0.05, 15 leaves & 80 iter., rate 0.08, 31 leaves\\
+XGBoost & 150 trees, depth 4, rate 0.05 & 150 trees, depth 6, rate 0.05\\
+LightGBM & 150 trees, 15 leaves, rate 0.05 & 150 trees, 31 leaves, rate 0.05\\\bottomrule
+\end{tabularx}
+\end{table}
+
+The robustness notebooks compare global blends, KMeans-partitioned local Ridge experts (a cluster is assigned to each sample by nearest centroid in standardised feature space), a global/local hybrid and just-in-time learning (JITL) with PCA or PLS neighbourhoods \citep{cheng2004jitl}. KMeans clusters are statistical groups of feature space, not confirmed operating regimes. The stability-first selection rule ranks candidates by mean RMSE, RMSE standard deviation across folds and worst-fold RMSE.
+
+\section{Uncertainty and drift flag}
+For the virtual sensor, an empirical 90\% interval is $\hat y_t\pm q_{0.9}$, where $q_{0.9}$ is the 90\textsuperscript{th} percentile of absolute validation residuals of the individual Ridge model (0.507). A drift flag marks samples lying outside the training envelope of the inputs. Both are advisory diagnostics, not guarantees.

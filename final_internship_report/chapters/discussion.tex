@@ -1,8 +1,31 @@
-\chapter{Discussion}
-The strongest evidence in the project is the target-anchored delta formulation on the held-out January period. It improved over persistence for all four horizons, whereas direct level prediction did not. This is a meaningful modeling result, but its use is conditional on a recent and correctly timestamped laboratory value. The target-free virtual sensor solves a different problem and should not be described as a substitute for a future warning.
+\chapter{Discussion, Limits and Lessons Learned}\label{ch:discussion}
 
-The later five-cluster Ridge decision prioritizes repeatability across four chronological folds, not the lowest average fold RMSE. That choice is reasonable for a prototype designed to avoid unstable behavior, but it remains a selection from one month. Its statistical clusters cannot be equated with confirmed process regimes until they are checked against operator records such as startup, shutdown, maintenance, cleaning, grade changes and disturbances.
+\section{Analysis of the results}
+The strongest evidence is the target-anchored delta formulation: on the held-out period it improved on persistence at all four horizons, whereas direct level prediction did not. Its use is conditional on a recent, correctly timestamped laboratory value, and the ablation shows that this value alone (set E) is not enough, as the gain comes from combining it with process information. The target-free virtual sensor answers a different question and must not be described as a future warning. The five-cluster Ridge decision favours repeatability over the lowest mean error; this is reasonable for a prototype meant to avoid erratic behaviour, but it is a selection made on one month, and the statistical clusters are groups of the sensor space that a future comparison with operating records (startups, shutdowns, maintenance) can interpret. Table~\ref{tab:evidence} summarises the evidence level of each result.
 
-Several limitations constrain interpretation. The dataset spans only January 2026; sensor semantics and units are incomplete for many tags; free acid is configured as manual laboratory data; and no variables are confirmed controllable. Empirical uncertainty and drift flags identify cases requiring caution, but they cannot prove correctness under a new operating distribution. The deployment path was tested in CSV replay, not against a secured plant endpoint. The prototype also does not establish production hardware, long-term retention, access control, backup, or model-governance arrangements.
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Evidence level and status of the main results.}\label{tab:evidence}
+\begin{tabularx}{\textwidth}{L{0.27\textwidth}YL{0.22\textwidth}}\toprule
+\thead\hd{Result} & \hd{Evidence} & \hd{Status}\\\midrule
+Delta Ridge forecast & Held-out test (27--31 Jan), beats persistence at 4 horizons & Main forecasting result\\
+Target-free blend & Held-out test and 4 folds; 90\% interval coverage 89.7\% & Advisory diagnostic\\
+Five-cluster Ridge & 4 expanding folds, lowest variability & Retained in runtime\\
+Hybrid and JITL & Fold comparison and retrospective test & Research results\\
+Deployment chain & CSV replay, 19 automated tests & Stage 1 prototype\\\bottomrule
+\end{tabularx}
+\end{table}
 
-These limitations explain the architecture choices. Quality shields, chronological buffers, warm-up, status events, heartbeat, reconnection and read-only storage are not optional interface details. They preserve the distinction between an offline model result and a trustworthy advisory service. The correct next industrial step is controlled shadow operation, not automatic action.
+\section{Scope of the study and perspectives}
+The study covers one continuous month (January 2026, 44,640 minutes) of a single production line, which is sufficient to characterise short-term dynamics and to compare models under strict chronological validation. Within this scope, two aspects frame the interpretation of the results. First, the free acid is fed to the pipeline as a laboratory-sourced tag, so the forecasting contract relies on a freshness rule (120 minutes in the service) and the virtual sensor serves the periods without a fresh value. Second, the models are predictive: feature importance describes association with the free acid and is not an intervention recommendation.
+
+Uncertainty and drift indicators accompany each target-free estimate: the empirical 90\% interval achieved 89.7\% coverage and 1.4\% of test samples fell outside the training envelope. The deployment chain was exercised end to end in a replay environment with 19 automated tests. The perspectives that follow naturally are 
+\begin{itemize}
+  \item (i) extending the evaluation to additional months with rolling-origin validation, using the frozen candidates of this report; 
+  \item (ii) confirming the regime-aware hybrid, which improved the RMSE by 2.5\% retrospectively; 
+  \item (iii) relating the statistical clusters to the plant's operating records;
+  \item (iv) running the service in read-only shadow mode against a secured gateway, as planned in Stage~2. 
+\end{itemize}
+The architecture already contains the mechanisms this requires: the quality shield, the chronological buffer, warm-up, status events, heartbeat, reconnection and read-only storage.
+
+\section{Lessons learned}
+On the data-science side, the project showed why time ordering, a persistence baseline and leakage control are essential for one-minute process data, and that a change target can be more appropriate than an absolute level when the current value is highly persistent. On the software side, notebook logic became saved artifacts, a feature builder reproducing the accepted contract, configuration-driven OPC mapping, tests, containers and a read-only dashboard; industrial machine learning depends on traceability of feature meaning, inputs, health state and output history. The most important practical lesson is scope discipline: a simulator confirms integration behaviour, predictive importance describes association, and a prediction informs rather than commands the operator.

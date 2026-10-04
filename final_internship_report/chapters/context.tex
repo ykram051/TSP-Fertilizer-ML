@@ -1,20 +1,56 @@
-\chapter{Internship Context and Problem Definition}
-\section{TSP monitoring context}
-The confirmed target is \texttt{SLURRY\_FREE\_ACID}. Consequently, the project separates three contracts: direct future-level prediction, target-anchored forecasting and target-free current-time estimation. This separation is central to the validity of the conclusions.
+\chapter{Mission and Problem Definition}\label{ch:context}
 
-Direct future-level prediction uses process information available at time $t$ to estimate $y_{t+h}$. Target-anchored forecasting is allowed to use a fresh current laboratory result $y_t$ and estimates its future change. Target-free virtual sensing estimates the present value from process variables only. The latter is not an early-warning forecast.
+\section{The TSP process and the target variable}
+TSP is produced by attacking ground phosphate rock with phosphoric acid; for fluorapatite the overall reaction is commonly written $\mathrm{Ca_5(PO_4)_3F}+7\,\mathrm{H_3PO_4}+5\,\mathrm{H_2O}\rightarrow5\,\mathrm{Ca(H_2PO_4)_2\cdot H_2O}+\mathrm{HF}$ \citep{ifdc1998}. The free acid in the slurry is the acid that has not yet reacted, so it depends on the acid-to-rock ratio, temperatures and residence conditions. Figure~\ref{fig:process} shows the simplified path reconstructed from the tag names of the data dictionary; the diagram is a simplified reading of the tag names and of the variable registry (Appendix~\ref{app:evidence}).
 
-\begin{table}[H]\centering
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=3.5mm,
+ bx/.style={draw=OcpGreen,fill=LightGray,rounded corners=2pt,minimum height=10mm,text width=2.05cm,align=center,font=\scriptsize},
+ sg/.style={font=\scriptsize\ttfamily,text=OcpBlue},
+ arr/.style={-{Latex[length=1.8mm]},thick,draw=OcpGreen}]
+\node[bx](r){Acid lines 1, 2 and ground phosphate};
+\node[bx,right=of r](t){Attack and passage tanks};
+\node[bx,right=of t](s){Slurry sprayer};
+\node[bx,right=of s](d){Dryer (fuel oil, hot air)};
+\node[bx,right=of d](o){TSP product};
+\draw[arr](r)--(t);\draw[arr](t)--(s);\draw[arr](s)--(d);\draw[arr](d)--(o);
+\node[sg,below=2mm of t]{CUVE\_ATTAQUE, LEVEL\_CUVE\_PASSAGE};
+\node[sg,below=2mm of d]{SECHEUR, AIR\_CHAUD};
+\draw[arr,dashed,OcpBlue](d.north) -- ++(0,6mm) -| node[above,pos=0.25,font=\scriptsize,text=OcpBlue]{RECYCLAGE} (r.north);
+\node[draw=Amber,fill=white,rounded corners=2pt,font=\scriptsize,text=Amber,above=11mm of s,text width=3.6cm,align=center]{target: \texttt{SLURRY\_FREE\_ACID}};
+\draw[Amber,-{Latex[length=1.8mm]}] (s.north) ++(0,0) -- ++(0,4.4mm);
+\end{tikzpicture}
+\caption{Simplified TSP line inferred from the data dictionary.}\label{fig:process}
+\end{figure}
+
+\section{Three prediction contracts}
+The central methodological decision is to separate what each model is \emph{allowed to know}. Let $x_{t}$ be the process measurements at minute $t$, $y_t$ the free acid, and $h\in\{1,5,10,15\}$ the horizon in minutes (Table~\ref{tab:contracts}). A fresh laboratory value $y_t$ is a permissible input only for the target-anchored contract.
+
+\begin{table}[!htbp]\centering\small\zebra
 \caption{Operational prediction contracts evaluated in the project.}\label{tab:contracts}
-\begin{tabularx}{\textwidth}{L{0.25\textwidth}Y Y}\toprule
-\textbf{Contract} & \textbf{Inputs} & \textbf{Output}\\\midrule
-Direct level & Process measurements at or before $t$ & $\hat y_{t+h}$\\
-Target anchored & Process information and fresh $y_t$ & $\hat y_{t+h}$ through predicted change\\
-Target free & Process information only & Current estimate $\hat y_t$\\\bottomrule
+\begin{tabularx}{\textwidth}{L{0.20\textwidth}L{0.33\textwidth}Y}\toprule
+\thead\hd{Contract} & \hd{Inputs} & \hd{Output}\\\midrule
+Direct level & $x_{\le t}$ only & $\hat y_{t+h}=f_h(x_{\le t})$\\
+Target anchored & $x_{\le t}$ and a fresh $y_t$ & $\hat y_{t+h}=y_t+\widehat{\Delta y}_{t,h}$\\
+Target free & $x_{\le t}$, no target history & $\hat y_t=g(x_{\le t})$\\\bottomrule
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:contracts} prevents a common industrial error: presenting a current estimate as a future warning, or using a laboratory value as though it were a live sensor. The constraints also include time ordering, missing data, unknown unit semantics for several tags, limited data coverage, and the requirement that a model failure must not affect plant control.
+\section{Place of the work in the company}
+The prototype sits \emph{beside} the control system, never inside it. It reads tags published through an OPC UA gateway, writes predictions to an audit database and shows them to engineers and operators on a dashboard. Table~\ref{tab:deliverables} lists what was delivered; the chain from historian data to advisory display is detailed in Chapter~\ref{ch:deploy}. Its design constraints are strict time ordering, sparse missing data, heterogeneous signal scales, a one-month history, and the requirement that a model or network failure must never affect plant control.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Deliverables of the internship.}\label{tab:deliverables}
+\begin{tabularx}{\textwidth}{L{0.26\textwidth}Y}\toprule
+\thead\hd{Deliverable} & \hd{Content}\\\midrule
+Notebooks 01--08 & Exploration, feature preparation, direct benchmark, delta and transition analysis, target-free virtual sensor, stability, regime-aware hybrid and JITL research\\
+Saved artifacts & Feature registry, lag table, clipping bounds, model bundles (\texttt{joblib}) and result tables\\
+Inference service & Python 3.11 service, OPC UA client, quality shield, rolling buffer, SQLite storage\\
+Simulator & OPC UA server replaying the historian CSV (Stage~1)\\
+Dashboard & PySide6 desktop application with trend, status cards and watchdog\\
+Packaging and tests & Docker Compose, PyInstaller build, ZIP release, 19 unit tests\\\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Evolution of the work}
-The work evolved from exploration to feature preparation, direct benchmarks, delta forecasting, a target-free virtual sensor, robustness research, dashboard development and a replay-based integration prototype. The final deployment code retains the target-free five-cluster Ridge candidate as a stability-oriented model. The target-anchored Ridge delta model remains a separate configurable mode. Neither is presented as a closed-loop controller or as fully validated on future production periods.
+The work progressed from exploration to feature preparation, direct benchmarks, delta forecasting, a target-free virtual sensor, robustness research, and finally a replay-based integration prototype with a dashboard. The deployed target-free runtime keeps the five-cluster Ridge candidate for stability; the target-anchored Ridge delta model remains a separate configurable mode. Neither is a closed-loop controller: both produce advisory values only.

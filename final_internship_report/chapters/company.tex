@@ -1,18 +1,61 @@
-\chapter{Company Presentation}
-\section{OCP Group}
-The OCP Group is a leading global producer of phosphate-based plant nutrition solutions and holds custody of approximately 68\% of the world's estimated phosphate reserves.
+\chapter{Company Presentation}\label{ch:company}
 
-\subsection*{Key Overview}
-\begin{itemize}
-    \item \textbf{Founded:} 1920 in Morocco as Office Chérifien des Phosphates.
-    \item \textbf{Headquarters:} Casablanca, Morocco.
-    \item \textbf{Core Activities:} Mining phosphate rock, producing phosphoric acid, and manufacturing customized fertilizers for global agriculture.
-    \item \textbf{Global Reach:} Serves clients across five continents with an integrated value chain spanning extraction, processing, and shipping.
-    \item \textbf{Recent Performance:} Reported a revenue of MAD 48.4 billion for the first half of 2026, maintaining a resilient EBITDA margin of 28\% despite global market challenges and high sulfur costs.
-\end{itemize}
+\section{OCP Group and its field of activity}
+OCP (Office Ch\'erifien des Phosphates) was founded in 1920 and is a leading global producer of phosphate-based plant nutrition products, holding about 68\% of the world's estimated phosphate reserves. Mining began at Khouribga in 1921 and extended to Youssoufia (1931) and Benguerir, while chemical production started at Safi (1965) and Jorf Lasfar (1984); a slurry pipeline linking Khouribga to Jorf Lasfar was inaugurated in 2014 \citep{wikiocp}. For the first half of 2026 the group reported revenue of MAD 48.4~billion and an EBITDA margin of 28\%, despite weaker fertilizer demand and a sharp rise in sulfur prices \citep{mwn2026}.
 
-\section{Industrial activities relevant to the project}
-The project concerns the conversion of production measurements into information useful for process monitoring. The data dictionary identifies flows, temperatures, pressures, levels, recycle-related measurements and a free-acid target. These are characteristic of a production environment in which material feed, thermal conditions, slurry handling and drying-related signals are observed over time. The model does not replace process control. It produces an advisory estimate or forecast from read-only measurements.
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=5mm,
+ st/.style={draw=OcpGreen,fill=LightGray,rounded corners=2pt,minimum height=12mm,text width=3.0cm,align=center,font=\small},
+ lab/.style={font=\scriptsize\itshape,text=OcpBlue,align=center,text width=3.0cm},
+ arr/.style={-{Latex[length=2mm]},thick,draw=OcpGreen}]
+\node[st](a){\textbf{Mining}\\ phosphate rock};
+\node[st,right=of a](b){\textbf{Beneficiation and transport}\\ washing, slurry pipeline};
+\node[st,right=of b](c){\textbf{Chemical platforms}\\ phosphoric acid, fertilizers};
+\node[st,right=of c](d){\textbf{Marketing and export}\\ ports, customers};
+\node[lab,below=1mm of a]{Khouribga, Gantour (Youssoufia, Benguerir), Boucraa};
+\node[lab,below=1mm of b]{Khouribga--Jorf Lasfar pipeline (2014)};
+\node[lab,below=1mm of c]{Jorf Lasfar, Safi\\ \textcolor{OcpGreen}{\textbf{TSP lines}}};
+\node[lab,below=1mm of d]{Five continents};
+\draw[arr](a)--(b);\draw[arr](b)--(c);\draw[arr](c)--(d);
+\end{tikzpicture}
+\caption{Simplified OCP value chain; the project belongs to the chemical stage.}\label{fig:valuechain}
+\end{figure}
 
-\section{Relevant technical roles}
-The implementation crosses several engineering roles. Process and production teams validate signal meaning, units, stream pairing, operating events and acceptable error. Automation and control teams own PLC/DCS logic, safety functions and industrial tags. Industrial IT and OT teams govern the OPC UA endpoint, certificates, host placement and firewall path. Data and software engineers maintain the feature contract, models, containers, storage and dashboard. Maintenance contributes sensor and communications context. The repository explicitly leaves several of these confirmations pending, which is appropriate for a staged industrial prototype.
+Figure~\ref{fig:valuechain} places the internship in the chemical stage, where phosphoric acid and ground phosphate are converted into granular fertilizers. The data used by the project describe a TSP line: acid and phosphate feeds, reaction and passage tanks, slurry spraying, a dryer fed by fuel oil and hot air, and a recycle stream.
+
+\section{Organisational structure}
+OCP is organised along its value chain: mining sites, chemical platforms, and commercial and logistics activities, supported by transversal functions such as finance, human resources, maintenance and information systems. Figure~\ref{fig:org} gives a simplified functional view of the units that interact with this project; it is a working representation built from the group's published value chain and the roles met during the internship, not the official organisation chart.
+
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=4mm and 4mm,
+ top/.style={draw=OcpBlue,fill=OcpBlue,text=white,rounded corners=2pt,minimum height=9mm,text width=3.6cm,align=center,font=\small\bfseries},
+ mid/.style={draw=OcpBlue,fill=white,rounded corners=2pt,minimum height=9mm,text width=2.75cm,align=center,font=\small},
+ hl/.style={draw=OcpGreen,fill=LightGray,rounded corners=2pt,minimum height=9mm,text width=2.75cm,align=center,font=\small},
+ ln/.style={thick,draw=OcpBlue}]
+\node[top](g){OCP Group};
+\node[mid,below left=8mm and 12mm of g](m){Mining};
+\node[hl,below=8mm of g](c){Chemical platform: TSP production unit};
+\node[mid,below right=8mm and 12mm of g](k){Marketing and logistics};
+\node[mid,below left=8mm and 1mm of c](p){Process and production engineering};
+\node[mid,below=8mm of c](a){Automation and control (PLC/DCS)};
+\node[mid,below right=8mm and 1mm of c](i){Industrial IT/OT and data};
+\draw[ln](g)--(m);\draw[ln](g)--(c);\draw[ln](g)--(k);
+\draw[ln](c)--(p);\draw[ln](c)--(a);\draw[ln](c)--(i);
+\end{tikzpicture}
+\caption{Simplified functional structure around the host production unit.}\label{fig:org}
+\end{figure}
+
+\section{Professions involved in the project}
+The prototype sits at the intersection of several professions (Table~\ref{tab:roles}), each of which is an interface of the design: process engineers define what the signals represent, automation engineers own the control layer that the prototype never touches, industrial IT/OT teams govern the network path, and data and software engineers maintain the models and the service.
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Professions met in the project and their link with the prototype.}\label{tab:roles}
+\begin{tabularx}{\textwidth}{L{0.27\textwidth}YY}\toprule
+\thead\hd{Profession} & \hd{Responsibility} & \hd{Contribution expected by the project}\\\midrule
+Process and production & Operating conditions, product quality & Signal semantics, acceptable error, operating-event records\\
+Automation and control & PLC/DCS logic, interlocks, tags & Tag list and Node IDs; read-only integration with no write path\\
+Industrial IT and OT & Network zones, OPC UA endpoint, certificates & Gateway access, security policy, firewall route, host placement\\
+Data and software engineering & Features, models, containers, storage, dashboard & Feature contract, inference service, tests, monitoring interface\\
+Maintenance & Sensors and communications & Sensor health and communication status\\\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,18 +1,29 @@
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Operational prediction contracts evaluated in the project.}}{4}{table.caption.7}%
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Principal input families in the feature registry.}}{7}{table.caption.8}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Direct future-level Ridge results on the held-out January period.}}{11}{table.caption.10}%
-\contentsline {table}{\numberline {6.2}{\ignorespaces Target-anchored delta-Ridge test performance after future-level reconstruction.}}{12}{table.caption.11}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {table}{\numberline {9.1}{\ignorespaces Operational states exposed by the inference service.}}{19}{table.caption.16}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Professions met in the project and their link with the prototype.}}{3}{table.caption.4}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Operational prediction contracts evaluated in the project.}}{4}{table.caption.6}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Deliverables of the internship.}}{4}{table.caption.7}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Chronological split for the 1-minute horizon (rows and time span, UTC).}}{5}{table.caption.8}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Variables with the most missing values (out of 44,640 rows).}}{5}{table.caption.9}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Descriptive statistics of \texttt {SLURRY\textunderscore \allowbreak FREE\textunderscore \allowbreak ACID} (44,332 valid observations).}}{6}{table.caption.10}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Strongest Pearson correlations with the target and best lag.}}{6}{table.caption.11}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Feature sets compared (counts are identical for all horizons).}}{8}{table.caption.13}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Expanding chronological folds used for stability analysis (UTC).}}{9}{table.caption.16}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Search space of the target-free benchmark (Notebook 05).}}{10}{table.caption.17}%
+\contentsline {table}{\numberline {6.1}{\ignorespaces Held-out test results (27--31 January): persistence, direct Ridge and target-anchored delta Ridge. $I_h$ follows Equation~\ref {eq:improvement}.}}{10}{table.caption.18}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Ablation of Ridge delta models: RMSE improvement $I_h$ (\%) over persistence on the test period.}}{11}{table.caption.19}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Direct benchmark: validation RMSE by feature set and model.}}{12}{table.caption.21}%
+\contentsline {table}{\numberline {6.4}{\ignorespaces Target-free virtual sensor on the full feature set (178 features), test period.}}{12}{table.caption.22}%
+\contentsline {table}{\numberline {6.5}{\ignorespaces Test error distribution of the delta Ridge forecast (absolute errors).}}{13}{table.caption.24}%
+\contentsline {table}{\numberline {6.6}{\ignorespaces Test error by statistical operating regime, 10-minute delta forecast.}}{13}{table.caption.25}%
+\contentsline {table}{\numberline {6.7}{\ignorespaces Four-fold stability comparison of target-free candidates (RMSE).}}{14}{table.caption.27}%
+\contentsline {table}{\numberline {6.8}{\ignorespaces Per-fold RMSE of the two leading target-free candidates.}}{14}{table.caption.28}%
+\contentsline {table}{\numberline {6.9}{\ignorespaces Computational cost of target-free models on the full feature set.}}{15}{table.caption.30}%
+\contentsline {table}{\numberline {6.10}{\ignorespaces Largest permutation importances, target-free benchmark on the full feature set.}}{15}{table.caption.31}%
+\contentsline {table}{\numberline {7.1}{\ignorespaces Staged deployment roadmap.}}{17}{table.caption.33}%
+\contentsline {table}{\numberline {7.2}{\ignorespaces OPC UA security profile for plant connection.}}{17}{table.caption.34}%
+\contentsline {table}{\numberline {7.3}{\ignorespaces Main runtime parameters of the inference service (\texttt {service.yaml}).}}{17}{table.caption.35}%
+\contentsline {table}{\numberline {7.4}{\ignorespaces SQLite data model.}}{18}{table.caption.36}%
+\contentsline {table}{\numberline {7.5}{\ignorespaces Data-quality rules applied to every snapshot.}}{18}{table.caption.37}%
+\contentsline {table}{\numberline {7.6}{\ignorespaces Operational states exposed by the inference service.}}{20}{table.caption.39}%
+\contentsline {table}{\numberline {8.1}{\ignorespaces Evidence level and status of the main results.}}{20}{table.caption.40}%
+\contentsline {table}{\numberline {9.1}{\ignorespaces Key results of the internship at a glance.}}{22}{table.caption.41}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces Variable registry (target in the last row).}}{23}{table.caption.43}%

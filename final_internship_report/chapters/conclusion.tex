@@ -1,6 +1,20 @@
-\chapter{Conclusion and Future Work}
-The internship investigated free-acid monitoring for a TSP process using one month of one-minute production data. The project moved from exploration and feature engineering to controlled benchmarks, target-anchored delta forecasting, target-free virtual sensing, stability research, dashboards and a Docker/OPC UA laboratory prototype.
+\chapter{Conclusion and Future Work}\label{ch:conclusion}
+This internship investigated free-acid monitoring for a TSP process from one month of one-minute data. The work moved from exploration and leakage-controlled feature engineering to benchmarks, target-anchored delta forecasting, target-free virtual sensing, fold-based stability research, and an advisory Docker/OPC UA prototype with a native dashboard.
 
-The main forecasting result is a hybrid-feature Ridge delta model that beat persistence at 1, 5, 10 and 15 minutes on the held-out January period. A separate target-free Ridge-LightGBM virtual sensor outperformed a constant baseline, while five-cluster Ridge was retained by the deployment runtime as a stability-oriented candidate after chronological-fold analysis. The report does not combine these results: they answer different questions and have different evidence levels.
+The main forecasting result is a hybrid-feature Ridge delta model that beat persistence at 1, 5, 10 and 15 minutes, with RMSE improvements between 19.8\% and 34.9\% on the held-out period. A separate target-free Ridge--LightGBM virtual sensor outperformed the constant baseline (RMSE 0.301 against 0.454), and five-cluster Ridge was retained by the runtime for its stability across folds. These results answer different questions and have different evidence levels, so they are not combined (Table~\ref{tab:summary}).
 
-Future work should first obtain a later labeled production period and evaluate frozen candidates without retuning. It should then perform rolling-origin multi-month validation, verify units and proxy assumptions with process engineers, define laboratory freshness and warning costs, calibrate drift and uncertainty on independent residuals, and validate clusters against operational records. On the deployment side, the next milestones are secured Kepware integration, historian backfill, retention and backup policy, longer read-only shadow operation and operator feedback. Any move beyond advisory use would require separate governance and control-system approval.
+Future work follows the roadmap of Chapter~\ref{ch:deploy}. On the modelling side, it consists of evaluating the frozen candidates on further months with rolling-origin validation, confirming the regime-aware hybrid, calibrating the uncertainty on independent residuals and relating the statistical clusters to operating records. On the deployment side, the next milestones are a secured Kepware connection, historian backfill, a retention and backup policy and a longer read-only shadow operation with operator feedback (Stage~2), followed by the advisory display (Stage~3).
+
+\begin{table}[!htbp]\centering\small\zebra
+\caption{Key results of the internship at a glance.}\label{tab:summary}
+\begin{tabularx}{\textwidth}{L{0.34\textwidth}YL{0.20\textwidth}}\toprule
+\thead\hd{Component} & \hd{Main result} & \hd{Reference}\\\midrule
+Data and features & 44,640 rows, 21 sensors, 178 leakage-controlled features & Chapter~\ref{ch:data}\\
+Direct level forecast & 23--68\% worse than persistence & Table~\ref{tab:forecast}\\
+Target-anchored delta Ridge & RMSE 0.151--0.237, i.e.\ 19.8--34.9\% better than persistence & Table~\ref{tab:forecast}\\
+Target-free virtual sensor & RMSE 0.301, $R^2=0.558$, 90\% interval coverage 89.7\% & Table~\ref{tab:vsensor}\\
+Stability-oriented model & Five-cluster Ridge: fold std 0.0396, worst fold 0.3522 & Table~\ref{tab:stability}\\
+Regime-aware hybrid & RMSE 0.2903, 2.5\% better retrospectively & Section~\ref{sec:regimes}\\
+Deployment & Docker/OPC UA chain, SQLite audit, desktop dashboard, 19 tests & Chapter~\ref{ch:deploy}\\\bottomrule
+\end{tabularx}
+\end{table}

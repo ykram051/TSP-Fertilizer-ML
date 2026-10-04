@@ -1,10 +1,23 @@
-\chapter{Introduction}
-The internship addressed a practical question in TSP production: whether historical, one-minute process measurements can support useful estimates or short-horizon forecasts of \texttt{SLURRY\_FREE\_ACID}. The work was developed as an industrial machine-learning project rather than as a single offline model. It therefore included data investigation, leakage-controlled experiments, model selection, an interactive dashboard, and a laboratory deployment path built around OPC UA and Docker.
+\chapter{Introduction}\label{ch:intro}
 
-The project has two motivations. First, a quality-related measurement may not be continuously available as an online signal. Second, even when a recent laboratory result is available, anticipating its movement can provide an earlier indication of a change. These are different operational problems with different allowable inputs. Treating them as one task would overstate what a model can do.
+\section{Context and motivation}
+Triple Super Phosphate (TSP) is a concentrated phosphate fertilizer obtained by reacting ground phosphate rock with phosphoric acid. In the TSP line studied during this internship, a slurry is formed, sprayed and dried, and its \emph{free acid} content, recorded under the tag \var{SLURRY\_FREE\_ACID}, is the quantity the project tries to estimate and anticipate. The plant historian provides one-minute measurements of flows, temperatures, pressures and levels, but the free-acid value is a quality-type measurement that is not necessarily available as a continuous online signal.
 
-The general objective was to create a transparent, reproducible advisory prototype for free-acid monitoring. The specific objectives were to understand the available historian extract, prepare time-respecting features, compare appropriate baselines and models, distinguish future forecasting from current-time virtual sensing, test robustness across chronological folds, and connect saved artifacts to a safe read-only streaming architecture.
+Two operational questions follow. First, can the free acid be \emph{estimated now} from process variables alone when no fresh measurement exists (virtual sensing)? Second, when a recent laboratory result \emph{is} available, can its short-term movement be \emph{anticipated} earlier than by waiting for the next result (forecasting)? These problems allow different inputs and must not be mixed: presenting a current estimate as an early warning, or a laboratory value as a live sensor, would overstate what any model can do.
 
-The main contributions are: a documented feature contract with lags, rolling descriptors and process proxies; a target-anchored delta forecast that outperformed persistence on the held-out January period; a separate target-free virtual-sensor line of work; stability-oriented clustered Ridge experiments; and an advisory-only CSV-replay implementation with quality checks, warm-up, persistence and monitoring.
+\section{Objectives}
+The general objective was a transparent, reproducible and strictly advisory prototype for free-acid monitoring. It was broken down into six specific objectives:
+\begin{enumerate}
+\item characterise the historian extract (cadence, gaps, extremes, variable semantics);
+\item build a leakage-controlled, time-respecting feature contract (Chapter~\ref{ch:data});
+\item compare baselines and models under chronological validation (Chapters~\ref{ch:method} and~\ref{ch:results});
+\item separate future forecasting from current-time virtual sensing;
+\item assess robustness across chronological folds and select a model on stability, not only on mean error;
+\item connect the saved artifacts to a read-only streaming architecture with a monitoring dashboard (Chapter~\ref{ch:deploy}).
+\end{enumerate}
 
-The report follows the engineering progression of the project. Chapter 2 provides the available company context. Chapters 3 to 7 cover the problem, data, methodology, results and interpretation. Chapters 8 to 10 describe deployment, implementation and limitations. The final chapters state the contribution, conclusions and realistic next work.
+\section{Main contributions}
+The work produced (i) a documented feature contract of 178 engineered features per sample built from 21 sensors; (ii) a target-anchored delta forecast whose RMSE beats the persistence baseline by 19.8\% to 34.9\% on the held-out period (Table~\ref{tab:forecast}); (iii) a target-free virtual sensor with an empirical 90\% interval and an out-of-envelope flag; (iv) a stability-oriented selection of a five-cluster Ridge model; and (v) a Docker/OPC UA replay prototype with data-quality shielding, SQLite audit storage and a native desktop dashboard.
+
+\section{Organisation of the report}
+Chapter~\ref{ch:company} presents OCP Group, its activities, structure and professions. Chapters~\ref{ch:context} to~\ref{ch:deploy} describe the work carried out and its place in the plant's information flow: problem definition, data, methodology, results with interpretation, and the deployment prototype. Chapter~\ref{ch:discussion} analyses limits and lessons, and Chapter~\ref{ch:conclusion} concludes and lists future work.
